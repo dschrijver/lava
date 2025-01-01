@@ -1,0 +1,50 @@
+\documentclass{article}
+
+% --- PACKAGES ---
+\usepackage{graphicx} % Required for inserting images
+\usepackage{a4wide} % Tell latex to use the room there is on the page
+\usepackage[calc,showdow,english]{datetime2} % To get the date of today
+\usepackage{amsmath} % For matrices
+\usepackage{subcaption} % For captions of subfigures
+\usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red]{hyperref} % Make clickable references which are less ugly (borders removed)
+\usepackage[style=phys, articletitle=false,biblabel=brackets, chaptertitle=false,pageranges=false]{biblatex} % APS style (American Physical Society)
+\usepackage[absolute]{textpos}
+\usepackage{bm} % For bold Greek letters
+
+\addbibresource{references.bib}
+
+\newcommand{\doctitle}{Lava}
+\newcommand{\docsubtitle}{Master Final Project}
+\newcommand{\me}{D. Schrijver (1623281)}
+
+\DTMnewdatestyle{mydateformat}{%
+  \renewcommand{\DTMdisplaydate}[4]{%
+    \DTMmonthname{##2},\space%  (full) Month
+    \number##1%                       year
+  }%
+  \renewcommand{\DTMDisplaydate}{\DTMdisplaydate}%
+}
+\DTMsetdatestyle{mydateformat}
+\newcommand{\monthYear}{\today}
+
+\begin{document}
+\input{chapters/titlepage.tex}
+\input{chapters/abstract.tex}
+
+\newpage
+\renewcommand{\contentsname}{Table of Contents}
+{\hypersetup{linkcolor=black}
+\tableofcontents
+}
+
+% Main part of the document
+\input{chapters/introduction.tex}
+\input{chapters/theory.tex}
+\input{chapters/results.tex}
+
+\clearpage % Restrict floats (images)
+\printbibliography{}
+
+\input{chapters/appendix.tex}
+
+\end{document}
