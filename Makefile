@@ -19,6 +19,9 @@ poiseuille-sc: clean poiseuille-sc.out
 rayleigh: clean rayleigh.out
 	./rayleigh.out
 
+stefan: clean stefan.out
+	./stefan.out
+
 %.out: %.c
 	$(COMPILER) $< -o $@ $(OPT_FLAGS) $(DEBUG_FLAGS) $(LIBRARIES)
 

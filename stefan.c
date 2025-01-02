@@ -5,12 +5,12 @@
 
 
 // --- SETTINGS ---
-#define NTIME   1000000          // Number of timesteps
-#define NSTORE  10000            // Store macroscopic quantities after NSTORE timesteps
+#define NTIME   300000          // Number of timesteps
+#define NSTORE  1000            // Store macroscopic quantities after NSTORE timesteps
 #define NLOG    100             // Print progress percentage after NLOG timesteps
 
-#define NX 100                  // Number of cells in the x-direction
-#define NY 50                  // Number of cells in the y-direction
+#define NX 50                  // Number of cells in the x-direction
+#define NY 400                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
 static double tau = 1.0;
@@ -105,6 +105,7 @@ int main(void) {
     Fy = (double *) malloc(NX*NY*sizeof(double));
     T = (double *) malloc(NX*NY*sizeof(double));
     phi = (double *) malloc(NX*NY*sizeof(double));
+    phi_old = (double *) malloc(NX*NY*sizeof(double));
 
     // Allocate memory for populations
     f1 = (double *) malloc(NX*NY*NP*sizeof(double));
@@ -140,13 +141,6 @@ int main(void) {
 
     output_data(0, noutput);
     noutput++;
-
-    // Shift the velocity fields
-    for (int i = 0; i < NX; i++) {
-        for (int j = 0; j < NY; j++) {
-            v[INDEX_2D(i,j)] -= 1.0/(2.0*rho[INDEX_2D(i,j)])*Fy[INDEX_2D(i,j)];
-        }
-    }
 
     // MAIN LOOP
     for (int t = 0; t < NTIME; t++) {
@@ -214,8 +208,8 @@ int main(void) {
                 phi2 = phi_i*phi_i;
                 rho_i = rho[INDEX_2D(i,j)];
                 
-                Fx[INDEX_2D(i,j)] = -(1.0-phi2) * rho_i*u[INDEX_2D(i,j)];
-                Fy[INDEX_2D(i,j)] = -(1.0-phi2) * rho_i*v[INDEX_2D(i,j)];
+                // Fx[INDEX_2D(i,j)] = -(1.0-phi2) * rho_i*u[INDEX_2D(i,j)];
+                // Fy[INDEX_2D(i,j)] = -(1.0-phi2) * rho_i*v[INDEX_2D(i,j)];
             }
         }
 
@@ -265,7 +259,7 @@ int main(void) {
                     v_i += f1[INDEX_3D(i,j,p)]*cy[p];
                 }
                 rho[INDEX_2D(i,j)] = rho_i;
-                u[INDEX_2D(i,j)] = u_i / rho_i;
+                u[INDEX_2D(i,j)] = (u_i + 0.5*Fx[INDEX_2D(i,j)]) / rho_i;
                 v[INDEX_2D(i,j)] = (v_i + 0.5*Fy[INDEX_2D(i,j)]) / rho_i;
             }
         }
@@ -274,9 +268,9 @@ int main(void) {
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
                 phi_i = phi[INDEX_2D(i,j)];
-                T_i = T[INDEX_2D(i,j)];
-                H_i = (1.0-phi_i)*c_solid*T_i + phi_i*(c_liquid*(T_i-T_m) + c_solid*T_m);
                 phi_old[INDEX_2D(i,j)] = phi_i;
+                T_i = T[INDEX_2D(i,j)];
+                H_i = (1.0-phi_i)*c_solid*T_i + phi_i*(c_liquid*(T_i-T_m) + c_solid*T_m) + L_f*phi_i;
 
                 if (H_i < c_solid*T_m) {
                     phi[INDEX_2D(i,j)] = 0.0;
@@ -289,7 +283,17 @@ int main(void) {
                 }
             }
         }
+
+        // Log the progress
+        if (((t+1) % NLOG) == 0) {
+            printf("\rProgress: %.1f%%", ((double)(t+1))/((double)NTIME)*100.0);
+            fflush(stdout);
+        }
     }
+
+    output_data(NTIME, noutput);
+
+    printf("\nDone!\n");
 
     return 0;
 }
