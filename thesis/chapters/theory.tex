@@ -415,3 +415,20 @@ The algorithm for a fluid with phase change is given by:
     \item[12] Compute $H(t+1)$ and $\phi_l(t+1)$. 
     \item[13] $t = t + 1$ and return to step 1 while $t < t_{\text{final}}$.
 \end{itemize}
+
+\subsection{Stefan problem}
+To test the solidification, we apply the algorithm in \ref{it:Algorithm phase change} to a stationary flow where we have a cold plate on the bottom below the melting temperature. This means that the interface of solidified fluid grows upwards. We define the Stefan number as:
+
+\begin{equation}
+    \textit{St} = \frac{c \Delta T}{L_f}
+\end{equation}
+
+The position of the interface over time is given by:
+
+\begin{equation}
+    y_i(t) = A \sqrt{t}
+\end{equation}
+
+Where the constant $A$ depends on the Stefan number like:
+
+\subsection{}

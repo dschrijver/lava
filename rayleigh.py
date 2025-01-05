@@ -32,7 +32,7 @@ g = 9.81        # m/s^2
 alpha = 207e-6  # 1/K
 
 # Dimensionless numbers
-Ra = 1_000_000
+Ra = 5000
 Pr = 0.71
 
 # Computed dimensional quantities
@@ -102,5 +102,5 @@ ax[0].set_ylabel("y")
 ax[0].set_xlim(0, 100)
 
 
-plt.savefig("Ra1000000.pdf")
+plt.savefig("Ra5000.pdf")
 # plt.show()

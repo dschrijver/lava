@@ -15,8 +15,8 @@
 #define NY 50                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
-static double tau = 0.5012639224659765;
-static double tau_g = 0.5017801724872908;
+static double tau = 0.5178745629317195;
+static double tau_g = 0.5251754407489007;
 static double alpha = 207e-6;
 static double T_top = 293.0;
 static double T_bottom = 294.0;
@@ -24,8 +24,8 @@ static double g = 0.009661835748792274;
 
 
 // --- DISPLAY ---
-#define ANIM
-#undef  STORE
+#undef ANIM
+#define  STORE
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 400;
 const int cell_size = 8;
@@ -267,7 +267,7 @@ int main(void) {
                     uc = u_i*cx[p] + v_i*cy[p];
                     eq = w[p]*rho_i*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
                     S = (1.0 - 1.0/(2.0*tau))*w[p]*((cy[p]-v_i)/cs2 + uc/(cs2*cs2)*cy[p])*Fy_i;
-                    f2[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau_g)*f1[INDEX_3D(i,j,p)] + 1.0/tau_g*eq + S;
+                    f2[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau)*f1[INDEX_3D(i,j,p)] + 1.0/tau*eq + S;
                 }
             }
         }

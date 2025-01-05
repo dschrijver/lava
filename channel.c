@@ -2,32 +2,45 @@
 #include <stdlib.h> // malloc
 #include <hdf5.h>   // Output data_*.h5 files
 #include <time.h>   // time
+#include <raylib.h>
+#include <math.h>   // fmin, fmax
 
 
 // --- SETTINGS ---
-#define NTIME   300000          // Number of timesteps
-#define NSTORE  1000            // Store macroscopic quantities after NSTORE timesteps
+#define NTIME   10000          // Number of timesteps
+#define NSTORE  100            // Store macroscopic quantities after NSTORE timesteps
 #define NLOG    100             // Print progress percentage after NLOG timesteps
 
-#define NX 4                  // Number of cells in the x-direction
-#define NY 2048                  // Number of cells in the y-direction
+#define NX 800                  // Number of cells in the x-direction
+#define NY 800                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
 static double tau = 1.0;
-static double tau_g_liquid = 0.6;
-static double tau_g_solid = 0.6;
+static double tau_g_liquid = 0.51;
+static double tau_g_solid = 0.51;
 
 static double T_m = 0.0;
-static double T_top = 0.0;
-static double T_bottom = -1.0/0.95;
+static double T_top = -1.0;
+static double T_bottom = -1.0;
+static double T_ini = 0.1;
 
-static double c_liquid = 0.95;
-static double c_solid = 0.95;
+static double c_liquid = 1.0;
+static double c_solid = 1.0;
 static double L_f = 1.0;
 
-static double alpha = 207e-6;
+static double F_p = 1e-5;
 
 
+// --- DISPLAY ---
+#undef ANIM
+#define  STORE
+const int SCREEN_WIDTH = 400;
+const int SCREEN_HEIGHT = 400;
+const int cell_size = 2;
+const int steps_per_frame = 100;
+
+
+// --- SIMULATION ---
 #define INDEX_2D(i,j)       NY*(i) + (j)
 #define INDEX_3D(i,j,p)     NY*NP*(i) + NP*(j) + (p)
 
@@ -63,6 +76,8 @@ void output_data(int t, int n_output) {
     H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, u);
     dataset_id = H5Dcreate2(hdf5_fp, "v", H5T_NATIVE_DOUBLE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v);
+    dataset_id = H5Dcreate2(hdf5_fp, "Fx", H5T_NATIVE_DOUBLE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, Fx);
     dataset_id = H5Dcreate2(hdf5_fp, "Fy", H5T_NATIVE_DOUBLE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, Fy);
     dataset_id = H5Dcreate2(hdf5_fp, "T", H5T_NATIVE_DOUBLE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -79,6 +94,33 @@ void output_data(int t, int n_output) {
 }
 
 
+int render_frame() {
+    char phi_i;
+    Color cell_color = {0,0,0,255};
+
+    PollInputEvents(); // Poll input events (SUPPORT_CUSTOM_FRAME_CONTROL)
+    if (WindowShouldClose()) {
+        return 0;
+    }
+
+    BeginDrawing();
+
+        for (int i = 0; i < NX; i++) {
+            for (int j = 0; j < NY; j++) {
+                phi_i = (char)(fmin(fmax(phi[INDEX_2D(i,j)], 0.0), 1.0) * 255.0);
+                cell_color.r = phi_i;
+                cell_color.b = 255 - phi_i;
+                DrawRectangle(i*cell_size, (NY-1-j)*cell_size, cell_size, cell_size, cell_color);
+            }
+        }
+
+    EndDrawing();
+    SwapScreenBuffer();
+
+    return 1;
+}
+
+
 // Used for periodic boundary conditions
 int mod(int x, int n) {
     if (x < 0) return n-1;
@@ -88,7 +130,13 @@ int mod(int x, int n) {
 
 
 int main(void) {
+#ifdef STORE
     int noutput = 0;
+#endif
+
+#ifdef ANIM
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "");
+#endif
 
     // Variables used in functions
     double rho_i, u_i, v_i;
@@ -121,9 +169,7 @@ int main(void) {
             rho[INDEX_2D(i,j)] = 1.0;
             phi[INDEX_2D(i,j)] = 1.0;
             phi_old[INDEX_2D(i,j)] = 1.0;
-            y_i = 0.5+j;
-            x_i = 0.5+i;
-            T[INDEX_2D(i,j)] = T_m+0.1;
+            T[INDEX_2D(i,j)] = T_ini;
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
             for (int p = 0; p < NP; p++) {
@@ -136,21 +182,39 @@ int main(void) {
     // Initialize the force fields
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            Fx[INDEX_2D(i,j)] = 0.0;
+            Fx[INDEX_2D(i,j)] = F_p;
             Fy[INDEX_2D(i,j)] = 0.0;
         }
     }
 
+#ifdef STORE
+    // Output initial macroscopic quantities
     output_data(0, noutput);
     noutput++;
+#endif
+
+    // Shift the velocity fields
+    for (int i = 0; i < NX; i++) {
+        for (int j = 0; j < NY; j++) {
+            u[INDEX_2D(i,j)] -= 1.0/(2.0*rho[INDEX_2D(i,j)])*Fx[INDEX_2D(i,j)];
+        }
+    }
 
     // MAIN LOOP
     for (int t = 0; t < NTIME; t++) {
+#ifdef ANIM
+        if ((t % steps_per_frame) == 0) {
+            if (!render_frame()) break;
+        }
+#endif
+
+#ifdef STORE
         // Output macroscopic quantities
         if (((t % NSTORE) == 0) && (t > 0)) {
             output_data(t, noutput);
             noutput++;
         }
+#endif
 
         // Collide thermal populations
         for (int i = 0; i < NX; i++) {
@@ -184,6 +248,10 @@ int main(void) {
                         p_i = ((p+3)%8)+1;
                         g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_top;
                     }
+                    else if (i-cx_i[p] < 0) {
+                        p_i = ((p+3)%8)+1;
+                        g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_ini;
+                    }
                     else {
                         x_i = mod(i-cx_i[p], NX);
                         g1[INDEX_3D(i,j,p)] = g2[INDEX_3D(x_i, y_i, p)];
@@ -210,8 +278,8 @@ int main(void) {
                 phi2 = phi_i*phi_i;
                 rho_i = rho[INDEX_2D(i,j)];
                 
-                // Fx[INDEX_2D(i,j)] = -(1.0-phi2) * rho_i*u[INDEX_2D(i,j)];
-                // Fy[INDEX_2D(i,j)] = -(1.0-phi2) * rho_i*v[INDEX_2D(i,j)];
+                Fx[INDEX_2D(i,j)] = F_p - (1.0-phi2)*rho_i*u[INDEX_2D(i,j)];
+                Fy[INDEX_2D(i,j)] = -(1.0-phi2)*rho_i*v[INDEX_2D(i,j)];
             }
         }
 
@@ -293,7 +361,14 @@ int main(void) {
         }
     }
 
+#ifdef STORE
+    // Output the final macroscopic quantities
     output_data(NTIME, noutput);
+#endif
+
+#ifdef ANIM
+    CloseWindow();
+#endif
 
     printf("\nDone!\n");
 

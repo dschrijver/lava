@@ -1,9 +1,9 @@
-PWD /home/daan/Projects/lava_new/thesis
+PWD /home/daan/Projects/lava/thesis
 INPUT /etc/texmf/web2c/texmf.cnf
 INPUT /usr/share/texmf/web2c/texmf.cnf
 INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /home/daan/Projects/lava_new/thesis/main.tex
+INPUT /home/daan/Projects/lava/thesis/main.tex
 OUTPUT main.log
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/article.cls

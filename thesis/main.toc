@@ -15,5 +15,7 @@
 \contentsline {subsection}{\numberline {2.13}Rayleigh-Bénard convection}{11}{subsection.2.13}%
 \contentsline {subsection}{\numberline {2.14}Phase change}{13}{subsection.2.14}%
 \contentsline {subsection}{\numberline {2.15}Algorithm phase change}{13}{subsection.2.15}%
+\contentsline {subsection}{\numberline {2.16}Stefan problem}{14}{subsection.2.16}%
+\contentsline {subsection}{\numberline {2.17}}{14}{subsection.2.17}%
 \contentsline {section}{\numberline {3}Results}{15}{section.3}%
 \contentsline {section}{\numberline {4}Appendix}{17}{section.4}%

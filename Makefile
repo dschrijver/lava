@@ -22,6 +22,9 @@ rayleigh: clean rayleigh.out
 stefan: clean stefan.out
 	./stefan.out
 
+channel: clean channel.out
+	./channel.out
+
 %.out: %.c
 	$(COMPILER) $< -o $@ $(OPT_FLAGS) $(DEBUG_FLAGS) $(LIBRARIES)
 
