@@ -935,6 +935,11 @@ INPUT ./figures/Ra1000000.pdf
 INPUT figures/Ra1000000.pdf
 INPUT ./figures/Ra1000000.pdf
 INPUT ./figures/Ra1000000.pdf
+INPUT ./figures/stefan.pdf
+INPUT ./figures/stefan.pdf
+INPUT figures/stefan.pdf
+INPUT ./figures/stefan.pdf
+INPUT ./figures/stefan.pdf
 INPUT ./chapters/results.tex
 INPUT chapters/results.tex
 INPUT ./chapters/results.tex

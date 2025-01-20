@@ -428,9 +428,21 @@ To test the solidification, we apply the algorithm in~\ref{it:Algorithm phase ch
 The position of the interface over time is given by:
 
 \begin{equation}
-    y_i(t) = A \sqrt{t}
+    y_i(t) = 2 \lambda \sqrt{\kappa t}
 \end{equation}
 
-Where the constant $A$ depends on the Stefan number like:
+Where the constant $\lambda$ depends on the Stefan number as:
+
+\begin{equation}\label{eq:lambda equation}
+    \lambda e^{\lambda^2} \text{erf}(\lambda) = \frac{\textit{St}}{\sqrt{\pi}}
+\end{equation}
+
+We choose $c_p^{\text{liquid}} = c_p^{\text{solid}} = 0.95$, $L_f = 1$, $\textit{St} = 1$, $T_m = 0$, $T_{\text{bottom}} = -\textit{St}/c_p^{\text{solid}}$, $T_{\text{top}} = T_m$ and $\kappa^{\text{liquid}} = \kappa^{\text{solid}} = 0.00166$. We solve equation~\ref{eq:lambda equation} by using a rootfinding algorithm. The result is given in figure~\ref{fig:stefan}.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/stefan.pdf}
+    \caption{Position of interface over time, compared to the analytical solution.}\label{fig:stefan}
+\end{figure}
 
 \subsection{Phase change in multicomponent fluid}
