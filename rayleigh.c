@@ -15,8 +15,8 @@
 #define NY 50                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
-static double tau = 0.5178745629317195;
-static double tau_g = 0.5251754407489007;
+static double tau = 0.5012639224659765;
+static double tau_g = 0.5017801724872908;
 static double alpha = 207e-6;
 static double T_top = 293.0;
 static double T_bottom = 294.0;
@@ -24,8 +24,8 @@ static double g = 0.009661835748792274;
 
 
 // --- DISPLAY ---
-#undef ANIM
-#define  STORE
+#define ANIM
+#undef  STORE
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 400;
 const int cell_size = 8;

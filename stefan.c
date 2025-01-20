@@ -5,17 +5,17 @@
 
 
 // --- SETTINGS ---
-#define NTIME   300000          // Number of timesteps
+#define NTIME   100000          // Number of timesteps
 #define NSTORE  1000            // Store macroscopic quantities after NSTORE timesteps
 #define NLOG    100             // Print progress percentage after NLOG timesteps
 
 #define NX 4                  // Number of cells in the x-direction
-#define NY 2048                  // Number of cells in the y-direction
+#define NY 400                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
 static double tau = 1.0;
-static double tau_g_liquid = 0.6;
-static double tau_g_solid = 0.6;
+static double tau_g_liquid = 0.52;
+static double tau_g_solid = 0.52;
 
 static double T_m = 0.0;
 static double T_top = 0.0;
@@ -123,7 +123,7 @@ int main(void) {
             phi_old[INDEX_2D(i,j)] = 1.0;
             y_i = 0.5+j;
             x_i = 0.5+i;
-            T[INDEX_2D(i,j)] = T_m+0.1;
+            T[INDEX_2D(i,j)] = T_m;
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
             for (int p = 0; p < NP; p++) {
@@ -160,7 +160,7 @@ int main(void) {
                 T_i = T[INDEX_2D(i,j)];
                 u2 = u_i*u_i + v_i*v_i;
                 phi_i = phi[INDEX_2D(i,j)];
-                phi_old_i = phi[INDEX_2D(i,j)];
+                phi_old_i = phi_old[INDEX_2D(i,j)];
                 Delta_phi = phi_i - phi_old_i;
                 tau_g = phi_i*tau_g_liquid + (1.0-phi_i)*tau_g_solid;
                 for (int p = 0; p < NP; p++) {

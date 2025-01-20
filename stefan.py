@@ -52,8 +52,9 @@ time = np.array(time)
 h = np.array(h)
 
 St = 1.0
-tau_g = 0.6
+tau_g = 0.52
 kappa = 1.0/3.0*(tau_g-0.5)
+print(kappa)
 H = 2048
 params, _ = curve_fit(lambda x, a: a*np.sqrt(x), time, h)
 

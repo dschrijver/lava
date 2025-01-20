@@ -32,8 +32,8 @@ static double F_p = 1e-5;
 
 
 // --- DISPLAY ---
-#undef ANIM
-#define  STORE
+#define ANIM
+#undef  STORE
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 400;
 const int cell_size = 2;
@@ -247,10 +247,6 @@ int main(void) {
                     else if (y_i == NY) {
                         p_i = ((p+3)%8)+1;
                         g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_top;
-                    }
-                    else if (i-cx_i[p] < 0) {
-                        p_i = ((p+3)%8)+1;
-                        g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_ini;
                     }
                     else {
                         x_i = mod(i-cx_i[p], NX);

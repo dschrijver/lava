@@ -80,6 +80,8 @@ Where the index $q$ is given by:
     \bm{c}_q = -\bm{c}_i
 \end{equation}
 
+We can also have open boundaries. We can impose 
+
 \subsection{Basic algorithm}\label{subsec:Basic algorithm}
 The basic algorithm for a single component without any sources, given by the Lattice Boltzmann equation~\ref{eq:Lattice boltzmann equation}, can be desribed as follows:
 
@@ -309,7 +311,7 @@ The algorithm for a thermal fluid is given by:
 \end{itemize}
 
 \subsection{Rayleigh-Bénard convection}
-We want to simulate a test case of Rayleigh-Bénard convection in a periodic channel \cite{Rayleigh}. For this test case, we will go more deeply into the specifics of the unit conversion between real and lattice units. The chosen real length scale will be given by the height of the channel, $\widetilde{L} = \widetilde{L}_y = 1~\text{m}$. We use the buoyant velocity as the velocity scale, given by $\widetilde{U} = \sqrt{\widetilde{\alpha}\Delta\widetilde{T}\, \widetilde{g}\widetilde{L}}$. Notice that $\widetilde{\alpha}\Delta\widetilde{T}$ is a nondimensional quantitiy already. For the expansion coefficient, we arbitrarily choose $\widetilde{\alpha} = 2.07 \cdot 10^{-4}~\text{m}^2/\text{s}$. We set the bottom of the channel to $\widetilde{T}_{\text{bottom}} = 294~\text{K}$ and the top to $\widetilde{T}_{\text{top}} = 293~\text{K}$. The units of the temperature in the real case and in the lattice will be the same. The velocity scale is computed to be $\widetilde{U} \approx 4.5 \cdot 10^{-2}~\text{m}/\text{s}$. We will also choose the following dimensionless quantities:
+We want to simulate a test case of Rayleigh-Bénard convection in a periodic channel~\cite{Rayleigh}. For this test case, we will go more deeply into the specifics of the unit conversion between real and lattice units. The chosen real length scale will be given by the height of the channel, $\widetilde{L} = \widetilde{L}_y = 1~\text{m}$. We use the buoyant velocity as the velocity scale, given by $\widetilde{U} = \sqrt{\widetilde{\alpha}\Delta\widetilde{T}\, \widetilde{g}\widetilde{L}}$. Notice that $\widetilde{\alpha}\Delta\widetilde{T}$ is a nondimensional quantitiy already. For the expansion coefficient, we arbitrarily choose $\widetilde{\alpha} = 2.07 \cdot 10^{-4}~\text{m}^2/\text{s}$. We set the bottom of the channel to $\widetilde{T}_{\text{bottom}} = 294~\text{K}$ and the top to $\widetilde{T}_{\text{top}} = 293~\text{K}$. The units of the temperature in the real case and in the lattice will be the same. The velocity scale is computed to be $\widetilde{U} \approx 4.5 \cdot 10^{-2}~\text{m}/\text{s}$. We will also choose the following dimensionless quantities:
 
 \begin{equation}
     \textit{Ra} = \frac{\widetilde{U}^2 \widetilde{L}^2}{\nu \kappa},\quad \textit{Pr} = \frac{\nu}{\kappa}
@@ -417,7 +419,7 @@ The algorithm for a fluid with phase change is given by:
 \end{itemize}
 
 \subsection{Stefan problem}
-To test the solidification, we apply the algorithm in \ref{it:Algorithm phase change} to a stationary flow where we have a cold plate on the bottom below the melting temperature. This means that the interface of solidified fluid grows upwards. We define the Stefan number as:
+To test the solidification, we apply the algorithm in~\ref{it:Algorithm phase change} to a stationary flow where we have a cold plate on the bottom below the melting temperature. This means that the interface of solidified fluid grows upwards. We define the Stefan number as:
 
 \begin{equation}
     \textit{St} = \frac{c \Delta T}{L_f}
@@ -431,4 +433,4 @@ The position of the interface over time is given by:
 
 Where the constant $A$ depends on the Stefan number like:
 
-\subsection{}
+\subsection{Phase change in multicomponent fluid}

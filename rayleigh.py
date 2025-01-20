@@ -32,7 +32,7 @@ g = 9.81        # m/s^2
 alpha = 207e-6  # 1/K
 
 # Dimensionless numbers
-Ra = 5000
+Ra = 1000000
 Pr = 0.71
 
 # Computed dimensional quantities
