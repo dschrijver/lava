@@ -80,7 +80,19 @@ Where the index $q$ is given by:
     \bm{c}_q = -\bm{c}_i
 \end{equation}
 
-We can also have open boundaries. We can impose 
+We can also have open boundaries. We either impose a velocity profile or a density at these boundaries. A velocity is imposed as:
+
+\begin{equation}
+    f_i(\bm{x}, t+1) = f_q^*(\bm{x}, t) - 2 w_q \rho_{\text{in/out}} \frac{\bm{c}_q \cdot \bm{u}_{\text{in/out}}}{c_s^2}
+\end{equation}
+
+Note that a density at the inlet/outlet still needs to be chosen or interpolated. We can also impose a pressure difference between the inlet and outlet by choosing the densities to be specific values, because the pressure is directly proportional to the density. This is done using the anti-bounce-back scheme:
+
+\begin{equation}
+    f_i(\bm{x}, t+1) = -f_q^*(\bm{x}, t) + 2 w_q \rho_{\text{in/out}} \left( 1 + \frac{{\left(\bm{c}_q \cdot \bm{u}_{\text{in/out}}\right)}^2}{2 c_s^4} - \frac{|\bm{u}_{\text{in/out}}|^2}{2 c_s^2} \right)
+\end{equation}
+
+Where are not imposing a velocity at the outlet, only a density. This means that we need to find the value of $\bm{u}_{\text{in/out}}$, which can be done using interpolation of the known velocity at the gridpoints in the fluid. We will assume for simplicity that the velocity of the fluid at the outlet is equal to the velocity of the closest gridpoint. 
 
 \subsection{Basic algorithm}\label{subsec:Basic algorithm}
 The basic algorithm for a single component without any sources, given by the Lattice Boltzmann equation~\ref{eq:Lattice boltzmann equation}, can be desribed as follows:

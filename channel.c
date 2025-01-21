@@ -7,33 +7,34 @@
 
 
 // --- SETTINGS ---
-#define NTIME   10000          // Number of timesteps
+#define NTIME   1000          // Number of timesteps
 #define NSTORE  100            // Store macroscopic quantities after NSTORE timesteps
-#define NLOG    100             // Print progress percentage after NLOG timesteps
+#define NLOG    1             // Print progress percentage after NLOG timesteps
 
-#define NX 800                  // Number of cells in the x-direction
-#define NY 800                  // Number of cells in the y-direction
+#define NX 1000                  // Number of cells in the x-direction
+#define NY 1000                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
-static double tau = 1.0;
-static double tau_g_liquid = 0.51;
-static double tau_g_solid = 0.51;
+static double tau = 0.899;
+static double tau_g_liquid = 0.53;
+static double tau_g_solid = 0.53;
 
 static double T_m = 0.0;
 static double T_top = -1.0;
 static double T_bottom = -1.0;
-static double T_ini = 0.1;
+static double T_inlet = 0.0526;
+static double T_initial = 0.0526;
 
-static double c_liquid = 1.0;
-static double c_solid = 1.0;
+static double c_liquid = 0.95;
+static double c_solid = 0.95;
 static double L_f = 1.0;
 
-static double F_p = 1e-5;
+static double Delta_p = 1e-5;
 
 
 // --- DISPLAY ---
-#define ANIM
-#undef  STORE
+#undef ANIM
+#define  STORE
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 400;
 const int cell_size = 2;
@@ -121,14 +122,6 @@ int render_frame() {
 }
 
 
-// Used for periodic boundary conditions
-int mod(int x, int n) {
-    if (x < 0) return n-1;
-    if (x == n) return 0;
-    return x;
-}
-
-
 int main(void) {
 #ifdef STORE
     int noutput = 0;
@@ -140,11 +133,10 @@ int main(void) {
 
     // Variables used in functions
     double rho_i, u_i, v_i;
-    double Fy_i;
+    double Fx_i, Fy_i;
     double T_i;
     double u2, uc, eq, S;
     int x_i, y_i, p_i;
-
     double tau_g, phi_i, phi_old_i, Delta_phi, phi2, H_i;
 
     // Allocate memory for macroscopic quantities
@@ -166,10 +158,10 @@ int main(void) {
     // Choose initial density and velocity fields and compute initial populations
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            rho[INDEX_2D(i,j)] = 1.0;
+            rho[INDEX_2D(i,j)] = 1.0 - (Delta_p/cs2)/(double)NX * (0.5+(double)i);
             phi[INDEX_2D(i,j)] = 1.0;
             phi_old[INDEX_2D(i,j)] = 1.0;
-            T[INDEX_2D(i,j)] = T_ini;
+            T[INDEX_2D(i,j)] = T_initial;
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
             for (int p = 0; p < NP; p++) {
@@ -182,7 +174,7 @@ int main(void) {
     // Initialize the force fields
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            Fx[INDEX_2D(i,j)] = F_p;
+            Fx[INDEX_2D(i,j)] = 0.0;
             Fy[INDEX_2D(i,j)] = 0.0;
         }
     }
@@ -192,13 +184,6 @@ int main(void) {
     output_data(0, noutput);
     noutput++;
 #endif
-
-    // Shift the velocity fields
-    for (int i = 0; i < NX; i++) {
-        for (int j = 0; j < NY; j++) {
-            u[INDEX_2D(i,j)] -= 1.0/(2.0*rho[INDEX_2D(i,j)])*Fx[INDEX_2D(i,j)];
-        }
-    }
 
     // MAIN LOOP
     for (int t = 0; t < NTIME; t++) {
@@ -238,18 +223,27 @@ int main(void) {
         // Stream thermal populations
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
+                u_i = u[INDEX_2D(i,j)];
+                v_i = v[INDEX_2D(i,j)];
+                u2 = u_i*u_i + v_i*v_i;
                 for (int p = 0; p < NP; p++) {
+                    x_i = i-cx_i[p];
                     y_i = j-cy_i[p];
-                    if (y_i < 0) {
-                        p_i = ((p+3)%8)+1;
+                    p_i = ((p+3)%8)+1;
+                    uc = u_i*cx[p] + v_i*cy[p];
+                    if (x_i < 0) {
+                        g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_inlet*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                    }
+                    else if (x_i == NX) {
+                        g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                    }
+                    else if (y_i < 0) {
                         g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_bottom;
                     }
                     else if (y_i == NY) {
-                        p_i = ((p+3)%8)+1;
                         g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_top;
                     }
                     else {
-                        x_i = mod(i-cx_i[p], NX);
                         g1[INDEX_3D(i,j,p)] = g2[INDEX_3D(x_i, y_i, p)];
                     }
                 }
@@ -274,7 +268,7 @@ int main(void) {
                 phi2 = phi_i*phi_i;
                 rho_i = rho[INDEX_2D(i,j)];
                 
-                Fx[INDEX_2D(i,j)] = F_p - (1.0-phi2)*rho_i*u[INDEX_2D(i,j)];
+                Fx[INDEX_2D(i,j)] = -(1.0-phi2)*rho_i*u[INDEX_2D(i,j)];
                 Fy[INDEX_2D(i,j)] = -(1.0-phi2)*rho_i*v[INDEX_2D(i,j)];
             }
         }
@@ -285,12 +279,14 @@ int main(void) {
                 rho_i = rho[INDEX_2D(i,j)];
                 u_i = u[INDEX_2D(i,j)];
                 v_i = v[INDEX_2D(i,j)];
+                Fx_i = Fx[INDEX_2D(i,j)];
                 Fy_i = Fy[INDEX_2D(i,j)];
                 u2 = u_i*u_i + v_i*v_i;
                 for (int p = 0; p < NP; p++) {
                     uc = u_i*cx[p] + v_i*cy[p];
                     eq = w[p]*rho_i*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
-                    S = (1.0 - 1.0/(2.0*tau))*w[p]*((cy[p]-v_i)/cs2 + uc/(cs2*cs2)*cy[p])*Fy_i;
+                    S = (1.0 - 1.0/(2.0*tau))*w[p]*(((cx[p]-u_i)/cs2 + uc/(cs2*cs2)*cx[p])*Fx_i + 
+                                                    ((cy[p]-v_i)/cs2 + uc/(cs2*cs2)*cy[p])*Fy_i);
                     f2[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau)*f1[INDEX_3D(i,j,p)] + 1.0/tau*eq + S;
                 }
             }
@@ -300,15 +296,23 @@ int main(void) {
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
                 for (int p = 0; p < NP; p++) {
-                    x_i = mod(i-cx_i[p], NX);
+                    x_i = i-cx_i[p];
                     y_i = j-cy_i[p];
-                    p_i = p;
-                    if ((y_i < 0) || (y_i == NY)) {
-                        x_i = i;
-                        y_i = j;
-                        p_i = ((p+3)%8)+1;
+                    p_i = ((p+3)%8)+1;
+                    if (x_i < 0) {
+                        uc = u_i*cx[p] + v_i*cy[p];
+                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
                     }
-                    f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(x_i, y_i, p_i)];
+                    else if (x_i == NX) {
+                        uc = u_i*cx[p] + v_i*cy[p];
+                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0-Delta_p/cs2)*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                    }
+                    else if ((y_i < 0) || (y_i == NY)) {
+                        f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(i, j, p_i)];
+                    }
+                    else {
+                        f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(x_i, y_i, p)];
+                    }
                 }
             }
         }

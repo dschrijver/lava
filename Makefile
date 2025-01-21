@@ -16,6 +16,9 @@ poiseuille: clean poiseuille.out
 poiseuille-sc: clean poiseuille-sc.out
 	./poiseuille-sc.out
 
+poiseuille-pressure: clean poiseuille-pressure.out
+	./poiseuille-pressure.out
+
 rayleigh: clean rayleigh.out
 	./rayleigh.out
 
