@@ -8,7 +8,7 @@
 
 // --- SETTINGS ---
 #define NTIME   1000          // Number of timesteps
-#define NSTORE  100            // Store macroscopic quantities after NSTORE timesteps
+#define NSTORE  10            // Store macroscopic quantities after NSTORE timesteps
 #define NLOG    1             // Print progress percentage after NLOG timesteps
 
 #define NX 1000                  // Number of cells in the x-direction
@@ -30,13 +30,14 @@ static double c_solid = 0.95;
 static double L_f = 1.0;
 
 static double Delta_p = 1e-5;
+static double starting_width = 600.0;
 
 
 // --- DISPLAY ---
 #undef ANIM
 #define  STORE
-const int SCREEN_WIDTH = 400;
-const int SCREEN_HEIGHT = 400;
+const int SCREEN_WIDTH = 500;
+const int SCREEN_HEIGHT = 500;
 const int cell_size = 2;
 const int steps_per_frame = 100;
 
@@ -158,10 +159,18 @@ int main(void) {
     // Choose initial density and velocity fields and compute initial populations
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            rho[INDEX_2D(i,j)] = 1.0 - (Delta_p/cs2)/(double)NX * (0.5+(double)i);
-            phi[INDEX_2D(i,j)] = 1.0;
-            phi_old[INDEX_2D(i,j)] = 1.0;
-            T[INDEX_2D(i,j)] = T_initial;
+            rho[INDEX_2D(i,j)] = 1.0;
+            if ((0.5 + (double)j > 0.5*((double)NY - starting_width)) &&
+                (0.5 + (double)j < 0.5*((double)NY - starting_width) + starting_width)) {
+                phi[INDEX_2D(i,j)] = 1.0;
+                phi_old[INDEX_2D(i,j)] = 1.0;
+                T[INDEX_2D(i,j)] = T_initial;
+            }
+            else {
+                phi[INDEX_2D(i,j)] = 0.0;
+                phi_old[INDEX_2D(i,j)] = 0.0;
+                T[INDEX_2D(i,j)] = T_bottom;
+            }
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
             for (int p = 0; p < NP; p++) {
@@ -232,7 +241,11 @@ int main(void) {
                     p_i = ((p+3)%8)+1;
                     uc = u_i*cx[p] + v_i*cy[p];
                     if (x_i < 0) {
-                        g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_inlet*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                        if (phi[INDEX_2D(i,j) == 0.0]) {
+                            g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                        } else {
+                            g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_inlet*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                        }
                     }
                     else if (x_i == NX) {
                         g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));

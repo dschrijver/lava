@@ -9,13 +9,13 @@
 \contentsline {subsection}{\numberline {2.7}Poiseuille flow}{7}{subsection.2.7}%
 \contentsline {subsection}{\numberline {2.8}Multicomponent Shan-Chen method}{8}{subsection.2.8}%
 \contentsline {subsection}{\numberline {2.9}Algorithm multicomponent Shan-Chen}{9}{subsection.2.9}%
-\contentsline {subsection}{\numberline {2.10}Multicomponent Poiseuille flow}{9}{subsection.2.10}%
-\contentsline {subsection}{\numberline {2.11}Temperature}{10}{subsection.2.11}%
+\contentsline {subsection}{\numberline {2.10}Multicomponent Poiseuille flow}{10}{subsection.2.10}%
+\contentsline {subsection}{\numberline {2.11}Temperature}{11}{subsection.2.11}%
 \contentsline {subsection}{\numberline {2.12}Algorithm thermal Lattice Boltzmann}{11}{subsection.2.12}%
-\contentsline {subsection}{\numberline {2.13}Rayleigh-Bénard convection}{11}{subsection.2.13}%
-\contentsline {subsection}{\numberline {2.14}Phase change}{13}{subsection.2.14}%
-\contentsline {subsection}{\numberline {2.15}Algorithm phase change}{13}{subsection.2.15}%
-\contentsline {subsection}{\numberline {2.16}Stefan problem}{14}{subsection.2.16}%
-\contentsline {subsection}{\numberline {2.17}Phase change in multicomponent fluid}{14}{subsection.2.17}%
-\contentsline {section}{\numberline {3}Results}{15}{section.3}%
-\contentsline {section}{\numberline {4}Appendix}{17}{section.4}%
+\contentsline {subsection}{\numberline {2.13}Rayleigh-Bénard convection}{12}{subsection.2.13}%
+\contentsline {subsection}{\numberline {2.14}Phase change}{12}{subsection.2.14}%
+\contentsline {subsection}{\numberline {2.15}Algorithm phase change}{14}{subsection.2.15}%
+\contentsline {subsection}{\numberline {2.16}Stefan problem}{15}{subsection.2.16}%
+\contentsline {subsection}{\numberline {2.17}Phase change in multicomponent fluid}{15}{subsection.2.17}%
+\contentsline {section}{\numberline {3}Results}{16}{section.3}%
+\contentsline {section}{\numberline {4}Appendix}{18}{section.4}%

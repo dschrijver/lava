@@ -3,12 +3,12 @@
 #include <hdf5.h>
 
 
-#define NTIME   100000
-#define NSTORE  1000
+#define NTIME   1000000
+#define NSTORE  10000
 #define NLOG    100
 
-#define NX 200
-#define NY 200
+#define NX 32
+#define NY 128
 #define NP 9
 
 #define INDEX_2D(i,j)       NY*(i) + (j)
@@ -22,7 +22,7 @@ static double w[NP] = {4.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/9.0, 1.0/36.0, 1.0/9.0, 1
 
 static double cs2 = 1.0/3.0;
 static double tau = 1.0;
-static double Delta_p = 1e-5;
+static double Delta_p = 32e-5;
 
 double *rho, *u, *v;
 double *f1, *f2;
@@ -58,7 +58,7 @@ void output_data(int t, int n_output) {
 
 int main(void) {
     double feq;
-    double rho_i, u_i, v_i, u2, uc;
+    double rho_i, u_i, v_i, u2, uc, d, u_exact, uc_exact;
     int x_i, y_i, p_i;
     
     int noutput = 0;
@@ -109,17 +109,19 @@ int main(void) {
             for (int j = 0; j < NY; j++) {
                 u_i = u[INDEX_2D(i,j)];
                 v_i = v[INDEX_2D(i,j)];
-                u2 = u_i*u_i + v_i*v_i;
+                d = (double)NY / 2.0;
+                y_i = 0.5-d + j;
+                u_exact = Delta_p/(double)NX / (2.0*(cs2*(tau-0.5))) * (d*d - y_i*y_i);
                 for (int p = 0; p < NP; p++) {
                     x_i = i-cx_i[p];
                     y_i = j-cy_i[p];
                     p_i = ((p+3)%8)+1;
+                    uc = u_i*cx[p_i] + v_i*cy[p_i];
+                    uc_exact = u_exact*cx[p_i];
                     if (x_i < 0) {
-                        uc = u_i*cx[p] + v_i*cy[p];
-                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                        f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(i, j, p_i)] - 2.0*w[p_i]*uc_exact/cs2;
                     }
                     else if (x_i == NX) {
-                        uc = u_i*cx[p] + v_i*cy[p];
                         f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0-Delta_p/cs2)*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
                     }
                     else if ((y_i < 0) || (y_i == NY)) {
@@ -150,7 +152,7 @@ int main(void) {
 
         // Log the progress
         if (((t+1) % NLOG) == 0) {
-            printf("\rProgress: %.1f%%", ((double)(t+1))/((double)NTIME)*100.0);
+            printf("\rProgress: %.2f%%", ((double)(t+1))/((double)NTIME)*100.0);
             fflush(stdout);
         }
     }

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.9.13)  21 JAN 2025 14:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.9.13)  22 JAN 2025 14:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -656,39 +656,45 @@ File: figures/poiseuille.pdf Graphic file (type pdf)
 <use figures/poiseuille.pdf>
 Package pdftex.def Info: figures/poiseuille.pdf  used on input line 156.
 (pdftex.def)             Requested size: 212.29312pt x 182.22299pt.
- [7] [8 <./figures/poiseuille.pdf>] [9]
-<figures/poiseuille_mc.pdf, id=229, 981.98302pt x 409.81902pt>
+ [7]
+<figures/poiseuille-pressure.pdf, id=188, 484.33893pt x 415.72778pt>
+File: figures/poiseuille-pressure.pdf Graphic file (type pdf)
+<use figures/poiseuille-pressure.pdf>
+Package pdftex.def Info: figures/poiseuille-pressure.pdf  used on input line 164.
+(pdftex.def)             Requested size: 212.29312pt x 182.22299pt.
+ [8 <./figures/poiseuille.pdf> <./figures/poiseuille-pressure.pdf>] [9]
+<figures/poiseuille_mc.pdf, id=240, 981.98302pt x 409.81902pt>
 File: figures/poiseuille_mc.pdf Graphic file (type pdf)
 <use figures/poiseuille_mc.pdf>
-Package pdftex.def Info: figures/poiseuille_mc.pdf  used on input line 253.
+Package pdftex.def Info: figures/poiseuille_mc.pdf  used on input line 261.
 (pdftex.def)             Requested size: 382.12502pt x 159.47232pt.
  [10 <./figures/poiseuille_mc.pdf>] [11]
-<figures/Ra5000.pdf, id=262, 1034.12189pt x 406.48756pt>
+<figures/Ra5000.pdf, id=274, 1034.12189pt x 406.48756pt>
 File: figures/Ra5000.pdf Graphic file (type pdf)
 <use figures/Ra5000.pdf>
-Package pdftex.def Info: figures/Ra5000.pdf  used on input line 342.
+Package pdftex.def Info: figures/Ra5000.pdf  used on input line 350.
 (pdftex.def)             Requested size: 322.68573pt x 126.84097pt.
-<figures/Ra50000.pdf, id=263, 1034.12189pt x 406.48756pt>
+<figures/Ra50000.pdf, id=275, 1034.12189pt x 406.48756pt>
 File: figures/Ra50000.pdf Graphic file (type pdf)
 <use figures/Ra50000.pdf>
-Package pdftex.def Info: figures/Ra50000.pdf  used on input line 351.
+Package pdftex.def Info: figures/Ra50000.pdf  used on input line 359.
 (pdftex.def)             Requested size: 322.68573pt x 126.84097pt.
-<figures/Ra1000000.pdf, id=264, 1034.12189pt x 406.48756pt>
+<figures/Ra1000000.pdf, id=276, 1034.12189pt x 406.48756pt>
 File: figures/Ra1000000.pdf Graphic file (type pdf)
 <use figures/Ra1000000.pdf>
-Package pdftex.def Info: figures/Ra1000000.pdf  used on input line 359.
+Package pdftex.def Info: figures/Ra1000000.pdf  used on input line 367.
 (pdftex.def)             Requested size: 322.68573pt x 126.84097pt.
- [12 <./figures/Ra5000.pdf> <./figures/Ra50000.pdf> <./figures/Ra1000000.pdf>] [13]
-<figures/stefan.pdf, id=301, 471.38937pt x 401.97969pt>
+ [12] [13 <./figures/Ra5000.pdf> <./figures/Ra50000.pdf> <./figures/Ra1000000.pdf>] [14]
+<figures/stefan.pdf, id=319, 471.38937pt x 401.97969pt>
 File: figures/stefan.pdf Graphic file (type pdf)
 <use figures/stefan.pdf>
-Package pdftex.def Info: figures/stefan.pdf  used on input line 456.
+Package pdftex.def Info: figures/stefan.pdf  used on input line 464.
 (pdftex.def)             Requested size: 212.29312pt x 181.03639pt.
-) (./chapters/results.tex [14 <./figures/stefan.pdf>]) [15
+) (./chapters/results.tex [15 <./figures/stefan.pdf>]) [16
 
-] (./chapters/appendix.tex [16
+] (./chapters/appendix.tex [17
 
-]) [17
+]) [18
 
 ] (./main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
@@ -698,18 +704,18 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 22032 strings out of 478287
- 413852 string characters out of 5849289
- 1110638 words of memory out of 5000000
- 39822 multiletter control sequences out of 15000+600000
+ 22043 strings out of 478287
+ 414188 string characters out of 5849289
+ 1112843 words of memory out of 5000000
+ 39830 multiletter control sequences out of 15000+600000
  484003 words of font info for 77 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  83i,15n,131p,1201b,1351s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb>
-Output written on main.pdf (17 pages, 487100 bytes).
+Output written on main.pdf (18 pages, 491509 bytes).
 PDF statistics:
- 437 PDF objects out of 1000 (max. 8388607)
- 365 compressed objects within 4 object streams
- 90 named destinations out of 1000 (max. 500000)
- 204 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 456 PDF objects out of 1000 (max. 8388607)
+ 382 compressed objects within 4 object streams
+ 92 named destinations out of 1000 (max. 500000)
+ 209 words of extra memory for PDF output out of 10000 (max. 10000000)
 

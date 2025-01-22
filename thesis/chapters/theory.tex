@@ -145,7 +145,7 @@ The algorithm for a single component with a sources, given by the Lattice Boltzm
 \subsection{Poiseuille flow}
 We can test the algorithm given in~\ref{it:Algorithm with sources} by making use of a two-dimensional Poiseuille flow. We use periodic boundary conditions given in equation~\ref{eq:Periodic streaming step} in the x-direction and no-slip boundary conditions given in equation~\ref{eq:No-slip streaming step} in the y-direction. The pressure gradient applied on the fluid is simulated as a body force, such that $\bm{F}(\bm{x}, t) = F_p \hat{\bm{x}}$. The initial density and velocity field are set to unity and zero, respectively. The analytical solution for this Poiseuille flow at asymptotic time is given by:
 
-\begin{equation}
+\begin{equation}\label{eq:Poiseuille solution}
     u(y) = \frac{F_p}{2 \nu} \left( d^2 - y^2 \right)
 \end{equation}
 
@@ -155,6 +155,14 @@ Where we defined the radius of the pipe as $d = N_y/2$ using the number of cells
     \centering
     \includegraphics[width=0.5\textwidth]{figures/poiseuille.pdf}
     \caption{Flow profile of simulated Poiseuille flow at $t=10^5$ compared to the analytical solution.}\label{fig:poiseuille}
+\end{figure}
+
+It is also possible to create a Poiseuille flow by using the fixed density boundary conditions for the inlet and outlet. For this, we replace $F_p$ in equation~\ref{eq:Poiseuille solution} by the constant pressure gradient $dp/dx$. We initialize the system with this constant pressure gradient, using the proportionality between pressure and density. We impose a density of unity at the inlet, and a density of $1 - \frac{dp}{dx} N_x$ at the outlet. The result is given in figure~\ref{fig:poiseuille-pressure}. The result does not match up with the analytical solution, as the boundary conditions in the corners are not well defined. For now, we chose to apply the boundary the inlet/outlet boundary conditions at the corners. 
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/poiseuille-pressure.pdf}
+    \caption{Flow profile of simulated Poiseuille flow at $t=10^6$ compared to the analytical solution, using fixed density boundary conditions.}\label{fig:poiseuille-pressure}
 \end{figure}
 
 \subsection{Multicomponent Shan-Chen method}
