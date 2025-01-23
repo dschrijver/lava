@@ -94,6 +94,57 @@ Note that a density at the inlet/outlet still needs to be chosen or interpolated
 
 Where are not imposing a velocity at the outlet, only a density. This means that we need to find the value of $\bm{u}_{\text{in/out}}$, which can be done using interpolation of the known velocity at the gridpoints in the fluid. We will assume for simplicity that the velocity of the fluid at the outlet is equal to the velocity of the closest gridpoint. 
 
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/NEBB.pdf}
+    \caption{NEBB scheme sketch}\label{fig:NEBB}
+\end{figure}
+
+
+Another method of imposing a certain velocity or density at the boundaries is by making use of the wet-node approach. The nodes now lie infinitesimally close to the wall, meaning that we directly apply the inlet density or inlet velocity on the nodes themselves. 
+
+\begin{equation}
+    \rho_{\text{in}} = f_0 + f_1 + f_2 + f_3 + f_4 + f_5 + f_6 + f_7 + f_8
+\end{equation}
+\begin{equation}
+    \rho_{\text{in}} u_{\text{in}} = -\left( f_2 + f_6 + f_8 \right) + \left(f_1 + f_5 + f_7\right)
+\end{equation}
+\begin{equation}
+    \rho_{\text{in}} v_{\text{in}} = -\left( f_4 + f_6 + f_7 \right) + \left(f_3 + f_5 + f_8\right)
+\end{equation}
+
+By assuming that the velocity in the x-direction is zero, we can solve for $u$:
+
+\begin{equation}
+    u_{\text{in}} = 1 - \frac{1}{\rho_{\text{in}}}\Bigl( 2\left( f_2 + f_6 + f_8 \right) + \left( f_0 + f_3 + f_4 \right) \Bigr)
+\end{equation}
+
+Using a similar procedure, the velocity at the outlet can be calculated as:
+
+\begin{equation}
+    u_{\text{out}} = -1 + \frac{1}{\rho_{\text{out}}}\Bigl( 2\left( f_1 + f_5 + f_7 \right) + \left( f_0 + f_3 + f_4 \right) \Bigr)
+\end{equation}
+
+For the inlet, the NEBB method gives the following values for the unknown populations:
+
+\begin{equation}
+\begin{split}
+    f_1 &= f_2 + \frac{2}{3}\rho_{\text{in}}u_{\text{in}}\\
+    f_5 &= f_6 - \frac{1}{2}\left(f_3 - f_4\right) + \frac{1}{6}u_{\text{in}}\\
+    f_7 &= f_8 + \frac{1}{2}\left(f_3 - f_4\right) + \frac{1}{6}u_{\text{in}};
+\end{split}
+\end{equation}
+
+And for the outlet:
+
+\begin{equation}
+\begin{split}
+    f_2 &= f_1 - \frac{2}{3}\rho_{\text{out}}u_{\text{out}}\\
+    f_6 &= f_5 + \frac{1}{2}\left(f_3 - f_4\right) - \frac{1}{6}u_{\text{out}}\\
+    f_8 &= f_7 - \frac{1}{2}\left(f_3 - f_4\right) - \frac{1}{6}u_{\text{out}};
+\end{split}
+\end{equation}
+
 \subsection{Basic algorithm}\label{subsec:Basic algorithm}
 The basic algorithm for a single component without any sources, given by the Lattice Boltzmann equation~\ref{eq:Lattice boltzmann equation}, can be desribed as follows:
 
@@ -162,7 +213,15 @@ It is also possible to create a Poiseuille flow by using the fixed density bound
 \begin{figure}[htp]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/poiseuille-pressure.pdf}
-    \caption{Flow profile of simulated Poiseuille flow at $t=10^6$ compared to the analytical solution, using fixed density boundary conditions.}\label{fig:poiseuille-pressure}
+    \caption{Flow profile of simulated Poiseuille flow at $t=10^6$ compared to the analytical solution, using fixed density boundary conditions and the anti-bounce-back method.}\label{fig:poiseuille-pressure}
+\end{figure}
+
+Using the NEBB method, we get much better results, as shown in figure~\ref{fig:poiseuille-pressure-NEBB}.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/poiseuille-pressure-NEBB.pdf}
+    \caption{Flow profile of simulated Poiseuille flow at $t=10^5$ compared to the analytical solution, using fixed density boundary conditions and the NEBB method.}\label{fig:poiseuille-pressure-NEBB}
 \end{figure}
 
 \subsection{Multicomponent Shan-Chen method}

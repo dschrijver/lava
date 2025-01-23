@@ -33,7 +33,7 @@ u_exact = np.array([F/(2*nu)*(d**2 - y_i**2) for y_i in y])
 
 fig, ax = plt.subplots(figsize=(7, 6.0))
 
-ax.plot(u[-1,:]/c_s, y, label="LBE")
+ax.plot(u[NX//2,:]/c_s, y, label="LBE")
 ax.plot(u_exact/c_s, y, ls="--", label="Analytical", color="red")
 ax.tick_params(axis='y', which='minor', left=False, right=False)
 ax.tick_params(axis='x', which='minor', bottom=False, top=False)

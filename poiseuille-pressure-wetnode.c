@@ -3,9 +3,9 @@
 #include <hdf5.h>
 
 
-#define NTIME   100000
-#define NSTORE  1000
-#define NLOG    10
+#define NTIME   1000000
+#define NSTORE  10000
+#define NLOG    100
 
 #define NX 32
 #define NY 128
@@ -73,7 +73,7 @@ int main(void) {
 
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            rho[INDEX_2D(i,j)] = 1.0 - (Delta_p/cs2)/(double)NX * (0.5+(double)i);
+            rho[INDEX_2D(i,j)] = 1.0 - (Delta_p/cs2)/(double)(NX-1) * (double)i;
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
             for (int p = 0; p < NP; p++) {
@@ -108,19 +108,12 @@ int main(void) {
 
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
-                u_i = u[INDEX_2D(i,j)];
-                v_i = v[INDEX_2D(i,j)];
-                u2 = u_i*u_i + v_i*v_i;
                 for (int p = 0; p < NP; p++) {
                     x_i = i-cx_i[p];
                     y_i = j-cy_i[p];
                     p_i = p_bounceback[p];
-                    uc = u_i*cx[p_i] + v_i*cy[p_i];
-                    if (x_i < 0) {
-                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
-                    }
-                    else if (x_i == NX) {
-                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0-Delta_p/cs2)*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                    if ((x_i < 0) || (x_i == NX)) {
+                        continue;
                     }
                     else if ((y_i < 0) || (y_i == NY)) {
                         f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(i, j, p_i)];
@@ -132,10 +125,23 @@ int main(void) {
             }
         }
 
-        // for (int p = 0; p < NP; p++) {
-        //     printf("%f ", f1[INDEX_3D(0,0,p)]);
-        // }
-        // printf("\n\n");
+        for (int j = 0; j < NY; j++) {
+            u_i = 1.0 - (f1[INDEX_3D(0,j,0)] + f1[INDEX_3D(0,j,3)] + f1[INDEX_3D(0,j,4)] + 2.0*(f1[INDEX_3D(0,j,2)] + f1[INDEX_3D(0,j,6)] + f1[INDEX_3D(0,j,8)]));
+
+            f1[INDEX_3D(0,j,1)] = f1[INDEX_3D(0,j,2)] + 2.0/3.0*u_i;
+
+            f1[INDEX_3D(0,j,5)] = f1[INDEX_3D(0,j,6)] - 0.5*(f1[INDEX_3D(0,j,3)] - f1[INDEX_3D(0,j,4)]) + 1.0/6.0*u_i;
+
+            f1[INDEX_3D(0,j,7)] = f1[INDEX_3D(0,j,8)] + 0.5*(f1[INDEX_3D(0,j,3)] - f1[INDEX_3D(0,j,4)]) + 1.0/6.0*u_i;
+
+            u_i = -1.0 + 1.0/(1.0-Delta_p/cs2)*(f1[INDEX_3D(NX-1,j,0)] + f1[INDEX_3D(NX-1,j,3)] + f1[INDEX_3D(NX-1,j,4)] + 2.0*(f1[INDEX_3D(NX-1,j,1)] + f1[INDEX_3D(NX-1,j,5)] + f1[INDEX_3D(NX-1,j,7)]));
+
+            f1[INDEX_3D(NX-1,j,2)] = f1[INDEX_3D(NX-1,j,1)] - 2.0/3.0*(1.0-Delta_p/cs2)*u_i;
+
+            f1[INDEX_3D(NX-1,j,6)] = f1[INDEX_3D(NX-1,j,5)] + 0.5*(f1[INDEX_3D(NX-1,j,3)] - f1[INDEX_3D(NX-1,j,4)]) - 1.0/6.0*(1.0-Delta_p/cs2)*u_i;
+
+            f1[INDEX_3D(NX-1,j,8)] = f1[INDEX_3D(NX-1,j,7)] - 0.5*(f1[INDEX_3D(NX-1,j,3)] - f1[INDEX_3D(NX-1,j,4)]) - 1.0/6.0*(1.0-Delta_p/cs2)*u_i;
+        }
 
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {

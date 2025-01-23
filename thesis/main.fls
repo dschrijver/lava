@@ -898,6 +898,11 @@ INPUT ./chapters/theory.tex
 INPUT chapters/theory.tex
 INPUT ./chapters/theory.tex
 INPUT chapters/theory.tex
+INPUT ./figures/NEBB.pdf
+INPUT ./figures/NEBB.pdf
+INPUT figures/NEBB.pdf
+INPUT ./figures/NEBB.pdf
+INPUT ./figures/NEBB.pdf
 INPUT ./figures/poiseuille.pdf
 INPUT ./figures/poiseuille.pdf
 INPUT figures/poiseuille.pdf
@@ -908,6 +913,11 @@ INPUT ./figures/poiseuille-pressure.pdf
 INPUT figures/poiseuille-pressure.pdf
 INPUT ./figures/poiseuille-pressure.pdf
 INPUT ./figures/poiseuille-pressure.pdf
+INPUT ./figures/poiseuille-pressure-NEBB.pdf
+INPUT ./figures/poiseuille-pressure-NEBB.pdf
+INPUT figures/poiseuille-pressure-NEBB.pdf
+INPUT ./figures/poiseuille-pressure-NEBB.pdf
+INPUT ./figures/poiseuille-pressure-NEBB.pdf
 INPUT ./figures/poiseuille_mc.pdf
 INPUT ./figures/poiseuille_mc.pdf
 INPUT figures/poiseuille_mc.pdf

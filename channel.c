@@ -7,12 +7,12 @@
 
 
 // --- SETTINGS ---
-#define NTIME   1000          // Number of timesteps
-#define NSTORE  10            // Store macroscopic quantities after NSTORE timesteps
+#define NTIME   10          // Number of timesteps
+#define NSTORE  1            // Store macroscopic quantities after NSTORE timesteps
 #define NLOG    1             // Print progress percentage after NLOG timesteps
 
-#define NX 1000                  // Number of cells in the x-direction
-#define NY 1000                  // Number of cells in the y-direction
+#define NX 32                  // Number of cells in the x-direction
+#define NY 128                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
 static double tau = 0.899;
@@ -30,7 +30,6 @@ static double c_solid = 0.95;
 static double L_f = 1.0;
 
 static double Delta_p = 1e-5;
-static double starting_width = 600.0;
 
 
 // --- DISPLAY ---
@@ -47,11 +46,12 @@ const int steps_per_frame = 100;
 #define INDEX_3D(i,j,p)     NY*NP*(i) + NP*(j) + (p)
 
 static double cs2 = 1.0/3.0;
-static int cx_i[NP] = {0, 1, 1, 0, -1, -1, -1, 0, 1};
-static int cy_i[NP] = {0, 0, -1, -1, -1, 0, 1, 1, 1};
-static double cx[NP] = {0.0, 1.0, 1.0, 0.0, -1.0, -1.0, -1.0, 0.0, 1.0};
-static double cy[NP] = {0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 1.0, 1.0, 1.0};
-static double w[NP] = {4.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/9.0, 1.0/36.0, 1.0/9.0, 1.0/36.0, 1.0/9.0, 1.0/36.0};
+static int cx_i[NP] = {0, 1, -1, 0, 0, 1, -1, 1, -1};
+static int cy_i[NP] = {0, 0, 0, 1, -1, 1, -1, -1, 1};
+static double cx[NP] = {0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0};
+static double cy[NP] = {0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0};
+static double w[NP] = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
+static int p_bounceback[NP] = {0, 2, 1, 4, 3, 6, 5, 8, 7};
 
 double *rho, *u, *v, *Fx, *Fy, *f1, *f2;
 double *T, *g1, *g2;
@@ -159,23 +159,15 @@ int main(void) {
     // Choose initial density and velocity fields and compute initial populations
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            rho[INDEX_2D(i,j)] = 1.0;
-            if ((0.5 + (double)j > 0.5*((double)NY - starting_width)) &&
-                (0.5 + (double)j < 0.5*((double)NY - starting_width) + starting_width)) {
-                phi[INDEX_2D(i,j)] = 1.0;
-                phi_old[INDEX_2D(i,j)] = 1.0;
-                T[INDEX_2D(i,j)] = T_initial;
-            }
-            else {
-                phi[INDEX_2D(i,j)] = 0.0;
-                phi_old[INDEX_2D(i,j)] = 0.0;
-                T[INDEX_2D(i,j)] = T_bottom;
-            }
+            rho[INDEX_2D(i,j)] = 1.0 - (Delta_p/cs2)/(double)(NX-1) * (double)i;
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
+            T[INDEX_2D(i,j)] = T_initial;
+            phi[INDEX_2D(i,j)] = 1.0;
+            phi_old[INDEX_2D(i,j)] = 1.0;
             for (int p = 0; p < NP; p++) {
                 f1[INDEX_3D(i,j,p)] = w[p]*rho[INDEX_2D(i,j)];
-                g1[INDEX_3D(i,j,p)] = w[p]*T[INDEX_2D(i,j)];
+                g1[INDEX_3D(i,j,p)] = w[p]*T_initial;
             }
         }
     }
@@ -218,7 +210,7 @@ int main(void) {
                 T_i = T[INDEX_2D(i,j)];
                 u2 = u_i*u_i + v_i*v_i;
                 phi_i = phi[INDEX_2D(i,j)];
-                phi_old_i = phi[INDEX_2D(i,j)];
+                phi_old_i = phi_old[INDEX_2D(i,j)];
                 Delta_phi = phi_i - phi_old_i;
                 tau_g = phi_i*tau_g_liquid + (1.0-phi_i)*tau_g_solid;
                 for (int p = 0; p < NP; p++) {
@@ -232,23 +224,12 @@ int main(void) {
         // Stream thermal populations
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
-                u_i = u[INDEX_2D(i,j)];
-                v_i = v[INDEX_2D(i,j)];
-                u2 = u_i*u_i + v_i*v_i;
                 for (int p = 0; p < NP; p++) {
                     x_i = i-cx_i[p];
                     y_i = j-cy_i[p];
-                    p_i = ((p+3)%8)+1;
-                    uc = u_i*cx[p] + v_i*cy[p];
-                    if (x_i < 0) {
-                        if (phi[INDEX_2D(i,j) == 0.0]) {
-                            g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
-                        } else {
-                            g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_inlet*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
-                        }
-                    }
-                    else if (x_i == NX) {
-                        g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                    p_i = p_bounceback[p];
+                    if ((x_i < 0) || (x_i == NX)) {
+                        continue;
                     }
                     else if (y_i < 0) {
                         g1[INDEX_3D(i,j,p)] = -g2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*T_bottom;
@@ -261,6 +242,36 @@ int main(void) {
                     }
                 }
             }
+        }
+
+        for (int j = 0; j < NY; j++) {
+            if (phi[INDEX_2D(0,j)] == 0.0) {
+                T_i = T[INDEX_2D(0,j)];
+            }
+            else if (phi[INDEX_2D(0,j)] == 1.0) {
+                T_i = T_inlet;
+            }
+            else {
+                T_i = phi[INDEX_2D(0,j)]*T_inlet + (1.0-phi[INDEX_2D(0,j)])*T[INDEX_2D(0,j)];
+            }
+
+            u_i = 1.0 - 1.0/T_i*(g1[INDEX_3D(0,j,0)] + g1[INDEX_3D(0,j,3)] + g1[INDEX_3D(0,j,4)] + 2.0*(g1[INDEX_3D(0,j,2)] + g1[INDEX_3D(0,j,6)] + g1[INDEX_3D(0,j,8)]));
+
+            g1[INDEX_3D(0,j,1)] = g1[INDEX_3D(0,j,2)] + 2.0/3.0*T_i*u_i;
+
+            g1[INDEX_3D(0,j,5)] = g1[INDEX_3D(0,j,6)] - 0.5*(g1[INDEX_3D(0,j,3)] - g1[INDEX_3D(0,j,4)]) + 1.0/6.0*T_i*u_i;
+
+            g1[INDEX_3D(0,j,7)] = g1[INDEX_3D(0,j,8)] + 0.5*(g1[INDEX_3D(0,j,3)] - g1[INDEX_3D(0,j,4)]) + 1.0/6.0*T_i*u_i;
+
+            T_i = T[INDEX_2D(NX-1, j)];
+
+            u_i = -1.0 + 1.0/T_i*(g1[INDEX_3D(NX-1,j,0)] + g1[INDEX_3D(NX-1,j,3)] + g1[INDEX_3D(NX-1,j,4)] + 2.0*(g1[INDEX_3D(NX-1,j,1)] + g1[INDEX_3D(NX-1,j,5)] + g1[INDEX_3D(NX-1,j,7)]));
+
+            g1[INDEX_3D(NX-1,j,2)] = g1[INDEX_3D(NX-1,j,1)] - 2.0/3.0*T_i*u_i;
+
+            g1[INDEX_3D(NX-1,j,6)] = g1[INDEX_3D(NX-1,j,5)] + 0.5*(g1[INDEX_3D(NX-1,j,3)] - g1[INDEX_3D(NX-1,j,4)]) - 1.0/6.0*T_i*u_i;
+
+            g1[INDEX_3D(NX-1,j,8)] = g1[INDEX_3D(NX-1,j,7)] - 0.5*(g1[INDEX_3D(NX-1,j,3)] - g1[INDEX_3D(NX-1,j,4)]) - 1.0/6.0*T_i*u_i;
         }
 
         // Calculate temperature
@@ -311,14 +322,9 @@ int main(void) {
                 for (int p = 0; p < NP; p++) {
                     x_i = i-cx_i[p];
                     y_i = j-cy_i[p];
-                    p_i = ((p+3)%8)+1;
-                    if (x_i < 0) {
-                        uc = u_i*cx[p] + v_i*cy[p];
-                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
-                    }
-                    else if (x_i == NX) {
-                        uc = u_i*cx[p] + v_i*cy[p];
-                        f1[INDEX_3D(i,j,p)] = -f2[INDEX_3D(i, j, p_i)] + 2.0*w[p_i]*(1.0-Delta_p/cs2)*(1.0 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                    p_i = p_bounceback[p];
+                    if ((x_i < 0) || (x_i == NX)) {
+                        continue;
                     }
                     else if ((y_i < 0) || (y_i == NY)) {
                         f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(i, j, p_i)];
@@ -328,6 +334,24 @@ int main(void) {
                     }
                 }
             }
+        }
+
+        for (int j = 0; j < NY; j++) {
+            u_i = 1.0 - (f1[INDEX_3D(0,j,0)] + f1[INDEX_3D(0,j,3)] + f1[INDEX_3D(0,j,4)] + 2.0*(f1[INDEX_3D(0,j,2)] + f1[INDEX_3D(0,j,6)] + f1[INDEX_3D(0,j,8)]));
+
+            f1[INDEX_3D(0,j,1)] = f1[INDEX_3D(0,j,2)] + 2.0/3.0*u_i;
+
+            f1[INDEX_3D(0,j,5)] = f1[INDEX_3D(0,j,6)] - 0.5*(f1[INDEX_3D(0,j,3)] - f1[INDEX_3D(0,j,4)]) + 1.0/6.0*u_i;
+
+            f1[INDEX_3D(0,j,7)] = f1[INDEX_3D(0,j,8)] + 0.5*(f1[INDEX_3D(0,j,3)] - f1[INDEX_3D(0,j,4)]) + 1.0/6.0*u_i;
+
+            u_i = -1.0 + 1.0/(1.0-Delta_p/cs2)*(f1[INDEX_3D(NX-1,j,0)] + f1[INDEX_3D(NX-1,j,3)] + f1[INDEX_3D(NX-1,j,4)] + 2.0*(f1[INDEX_3D(NX-1,j,1)] + f1[INDEX_3D(NX-1,j,5)] + f1[INDEX_3D(NX-1,j,7)]));
+
+            f1[INDEX_3D(NX-1,j,2)] = f1[INDEX_3D(NX-1,j,1)] - 2.0/3.0*(1.0-Delta_p/cs2)*u_i;
+
+            f1[INDEX_3D(NX-1,j,6)] = f1[INDEX_3D(NX-1,j,5)] + 0.5*(f1[INDEX_3D(NX-1,j,3)] - f1[INDEX_3D(NX-1,j,4)]) - 1.0/6.0*(1.0-Delta_p/cs2)*u_i;
+
+            f1[INDEX_3D(NX-1,j,8)] = f1[INDEX_3D(NX-1,j,7)] - 0.5*(f1[INDEX_3D(NX-1,j,3)] - f1[INDEX_3D(NX-1,j,4)]) - 1.0/6.0*(1.0-Delta_p/cs2)*u_i;
         }
 
         // Compute macroscopic quantities

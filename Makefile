@@ -1,6 +1,6 @@
 COMPILER = gcc
 OPT_FLAGS = -std=c17 -O3
-DEBUG_FLAGS = -Wall -Wextra
+DEBUG_FLAGS = -Wall -Wextra -g
 # Static linking with hdf5, link with compression library too. Order matters, hdf5 must be linked first!
 LIBRARIES = -I/usr/local/hdf5/include -L/usr/local/hdf5/lib -l:libhdf5.a -lm -lz -lraylib
 # LIBRARIES = -I/usr/local/hdf5/include -L/usr/local/hdf5/lib -Wl,-rpath /usr/local/hdf5/lib -l:libhdf5.so -lm -lz
@@ -18,6 +18,9 @@ poiseuille-sc: clean poiseuille-sc.out
 
 poiseuille-pressure: clean poiseuille-pressure.out
 	./poiseuille-pressure.out
+
+poiseuille-pressure-wetnode: clean poiseuille-pressure-wetnode.out
+	./poiseuille-pressure-wetnode.out
 
 rayleigh: clean rayleigh.out
 	./rayleigh.out
