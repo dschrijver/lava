@@ -7,30 +7,30 @@
 
 
 // --- SETTINGS ---
-#define NTIME   10          // Number of timesteps
-#define NSTORE  1            // Store macroscopic quantities after NSTORE timesteps
+#define NTIME   100000          // Number of timesteps
+#define NSTORE  1000            // Store macroscopic quantities after NSTORE timesteps
 #define NLOG    1             // Print progress percentage after NLOG timesteps
 
-#define NX 32                  // Number of cells in the x-direction
-#define NY 128                  // Number of cells in the y-direction
+#define NX 200                  // Number of cells in the x-direction
+#define NY 1200                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
-static double tau = 0.899;
-static double tau_g_liquid = 0.53;
-static double tau_g_solid = 0.53;
+const double tau = 1.0;
+const double tau_g_liquid = 1.0;
+const double tau_g_solid = 1.0;
 
-static double T_m = 0.0;
-static double T_top = -1.0;
-static double T_bottom = -1.0;
-static double T_inlet = 0.0526;
-static double T_initial = 0.0526;
+const double T_m = 0.0;
+const double T_top = -1.0;
+const double T_bottom = -1.0;
+const double T_inlet = 0.0526;
+const double T_initial = 0.0526;
 
-static double c_liquid = 0.95;
-static double c_solid = 0.95;
-static double L_f = 1.0;
+const double c_liquid = 0.95;
+const double c_solid = 0.95;
+const double L_f = 1.0;
 
-static double Delta_p = 1e-5;
-
+const double Delta_p = 1e-5;
+const double start_dist = 550.0;
 
 // --- DISPLAY ---
 #undef ANIM
@@ -45,13 +45,13 @@ const int steps_per_frame = 100;
 #define INDEX_2D(i,j)       NY*(i) + (j)
 #define INDEX_3D(i,j,p)     NY*NP*(i) + NP*(j) + (p)
 
-static double cs2 = 1.0/3.0;
-static int cx_i[NP] = {0, 1, -1, 0, 0, 1, -1, 1, -1};
-static int cy_i[NP] = {0, 0, 0, 1, -1, 1, -1, -1, 1};
-static double cx[NP] = {0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0};
-static double cy[NP] = {0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0};
-static double w[NP] = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
-static int p_bounceback[NP] = {0, 2, 1, 4, 3, 6, 5, 8, 7};
+const double cs2 = 1.0/3.0;
+const int cx_i[NP] = {0, 1, -1, 0, 0, 1, -1, 1, -1};
+const int cy_i[NP] = {0, 0, 0, 1, -1, 1, -1, -1, 1};
+const double cx[NP] = {0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0};
+const double cy[NP] = {0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0};
+const double w[NP] = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
+const int p_bounceback[NP] = {0, 2, 1, 4, 3, 6, 5, 8, 7};
 
 double *rho, *u, *v, *Fx, *Fy, *f1, *f2;
 double *T, *g1, *g2;
@@ -162,12 +162,26 @@ int main(void) {
             rho[INDEX_2D(i,j)] = 1.0 - (Delta_p/cs2)/(double)(NX-1) * (double)i;
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
-            T[INDEX_2D(i,j)] = T_initial;
-            phi[INDEX_2D(i,j)] = 1.0;
-            phi_old[INDEX_2D(i,j)] = 1.0;
+
+            if ((double)j + 0.5 < (double)start_dist) {
+                T[INDEX_2D(i,j)] = T_bottom;
+                phi[INDEX_2D(i,j)] = 0.0;
+                phi_old[INDEX_2D(i,j)] = 0.0;
+            }
+            else if ((double)j + 0.5 > (double)NY - start_dist) {
+                T[INDEX_2D(i,j)] = T_top;
+                phi[INDEX_2D(i,j)] = 0.0;
+                phi_old[INDEX_2D(i,j)] = 0.0;
+            }
+            else {
+                T[INDEX_2D(i,j)] = T_initial;
+                phi[INDEX_2D(i,j)] = 1.0;
+                phi_old[INDEX_2D(i,j)] = 1.0;    
+            }
+            
             for (int p = 0; p < NP; p++) {
                 f1[INDEX_3D(i,j,p)] = w[p]*rho[INDEX_2D(i,j)];
-                g1[INDEX_3D(i,j,p)] = w[p]*T_initial;
+                g1[INDEX_3D(i,j,p)] = w[p]*T[INDEX_2D(i,j)];
             }
         }
     }
@@ -175,8 +189,11 @@ int main(void) {
     // Initialize the force fields
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            Fx[INDEX_2D(i,j)] = 0.0;
-            Fy[INDEX_2D(i,j)] = 0.0;
+            phi_i = phi[INDEX_2D(i,j)];
+            phi2 = phi_i*phi_i;
+            rho_i = rho[INDEX_2D(i,j)];
+            Fx[INDEX_2D(i,j)] = -(1.0-phi2)*rho_i*u[INDEX_2D(i,j)];
+            Fy[INDEX_2D(i,j)] = -(1.0-phi2)*rho_i*v[INDEX_2D(i,j)];
         }
     }
 
@@ -185,6 +202,14 @@ int main(void) {
     output_data(0, noutput);
     noutput++;
 #endif
+
+    // Shift the velocity fields
+    for (int i = 0; i < NX; i++) {
+        for (int j = 0; j < NY; j++) {
+            u[INDEX_2D(i,j)] -= 1.0/(2.0*rho[INDEX_2D(i,j)])*Fx[INDEX_2D(i,j)];
+            v[INDEX_2D(i,j)] -= 1.0/(2.0*rho[INDEX_2D(i,j)])*Fy[INDEX_2D(i,j)];
+        }
+    }
 
     // MAIN LOOP
     for (int t = 0; t < NTIME; t++) {
@@ -246,13 +271,13 @@ int main(void) {
 
         for (int j = 0; j < NY; j++) {
             if (phi[INDEX_2D(0,j)] == 0.0) {
-                T_i = T[INDEX_2D(0,j)];
+                T_i = T[INDEX_2D(1,j)];
             }
             else if (phi[INDEX_2D(0,j)] == 1.0) {
                 T_i = T_inlet;
             }
             else {
-                T_i = phi[INDEX_2D(0,j)]*T_inlet + (1.0-phi[INDEX_2D(0,j)])*T[INDEX_2D(0,j)];
+                T_i = phi[INDEX_2D(0,j)]*T_inlet + (1.0-phi[INDEX_2D(0,j)])*T[INDEX_2D(1,j)];
             }
 
             u_i = 1.0 - 1.0/T_i*(g1[INDEX_3D(0,j,0)] + g1[INDEX_3D(0,j,3)] + g1[INDEX_3D(0,j,4)] + 2.0*(g1[INDEX_3D(0,j,2)] + g1[INDEX_3D(0,j,6)] + g1[INDEX_3D(0,j,8)]));
@@ -263,7 +288,7 @@ int main(void) {
 
             g1[INDEX_3D(0,j,7)] = g1[INDEX_3D(0,j,8)] + 0.5*(g1[INDEX_3D(0,j,3)] - g1[INDEX_3D(0,j,4)]) + 1.0/6.0*T_i*u_i;
 
-            T_i = T[INDEX_2D(NX-1, j)];
+            T_i = T[INDEX_2D(NX-2, j)];
 
             u_i = -1.0 + 1.0/T_i*(g1[INDEX_3D(NX-1,j,0)] + g1[INDEX_3D(NX-1,j,3)] + g1[INDEX_3D(NX-1,j,4)] + 2.0*(g1[INDEX_3D(NX-1,j,1)] + g1[INDEX_3D(NX-1,j,5)] + g1[INDEX_3D(NX-1,j,7)]));
 
