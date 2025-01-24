@@ -27,18 +27,18 @@ const double T_initial = 0.0526;
 
 const double c_liquid = 0.95;
 const double c_solid = 0.95;
-const double L_f = 1.0;
+const double L_f = 0.1;
 
 const double Delta_p = 1e-5;
 const double start_dist = 550.0;
 
 // --- DISPLAY ---
-#undef ANIM
-#define  STORE
-const int SCREEN_WIDTH = 500;
-const int SCREEN_HEIGHT = 500;
+#undef  STORE
+#define ANIM
+const int SCREEN_WIDTH = 100;
+const int SCREEN_HEIGHT = 600;
 const int cell_size = 2;
-const int steps_per_frame = 100;
+const int steps_per_frame = 10;
 
 
 // --- SIMULATION ---
@@ -97,7 +97,7 @@ void output_data(int t, int n_output) {
 
 
 int render_frame() {
-    char phi_i;
+    int phi_i;
     Color cell_color = {0,0,0,255};
 
     PollInputEvents(); // Poll input events (SUPPORT_CUSTOM_FRAME_CONTROL)
@@ -109,7 +109,10 @@ int render_frame() {
 
         for (int i = 0; i < NX; i++) {
             for (int j = 0; j < NY; j++) {
-                phi_i = (char)(fmin(fmax(phi[INDEX_2D(i,j)], 0.0), 1.0) * 255.0);
+                phi_i = (int)(phi[INDEX_2D(i,j)] * 255.0);
+                if (phi_i == 255) {
+                    printf("test\n");
+                }
                 cell_color.r = phi_i;
                 cell_color.b = 255 - phi_i;
                 DrawRectangle(i*cell_size, (NY-1-j)*cell_size, cell_size, cell_size, cell_color);
