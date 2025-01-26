@@ -4,6 +4,8 @@
 #include "../include/macroscopic.h"
 
 
+#ifdef FLOW
+
 void calculate_hydrodynamic_macroscopic_quantities() {
 
     double rho_i, u_i, v_i;
@@ -31,6 +33,9 @@ void calculate_hydrodynamic_macroscopic_quantities() {
     }
 }
 
+#endif
+
+#ifdef TEMPERATURE
 
 void calculate_thermal_macroscopic_quantities() {
 
@@ -53,6 +58,9 @@ void calculate_thermal_macroscopic_quantities() {
     
 }
 
+#endif
+
+#ifdef PHASECHANGE
 
 void calculate_enthalpy_and_liquid_fraction() {
 
@@ -64,13 +72,13 @@ void calculate_enthalpy_and_liquid_fraction() {
             phi_i = phi[INDEX_2D(i,j)];
             phi_old[INDEX_2D(i,j)] = phi_i;
             T_i = T[INDEX_2D(i,j)];
-            H_i = (1.0-phi_i)*c_solid*T_i + phi_i*(c_liquid*(T_i-T_m) + c_solid*T_m) + L_f*phi_i;
+            H_i = (1.0-phi_i)*c_solid*T_i + phi_i*(c_liquid*(T_i-T_melt) + c_solid*T_melt) + L_f*phi_i;
 
-            if (H_i < c_solid*T_m) {
+            if (H_i < c_solid*T_melt) {
                 phi[INDEX_2D(i,j)] = 0.0;
             }
-            else if ((c_solid*T_m <= H_i) && (H_i <= c_solid*T_m + L_f)) {
-                phi[INDEX_2D(i,j)] = (H_i-c_solid*T_m)/L_f;
+            else if ((c_solid*T_melt <= H_i) && (H_i <= c_solid*T_melt + L_f)) {
+                phi[INDEX_2D(i,j)] = (H_i-c_solid*T_melt)/L_f;
             }
             else {
                 phi[INDEX_2D(i,j)] = 1.0;
@@ -80,3 +88,5 @@ void calculate_enthalpy_and_liquid_fraction() {
     }
 
 }
+
+#endif

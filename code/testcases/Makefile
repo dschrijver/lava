@@ -1,0 +1,7 @@
+TESTCASE_DIRECTORIES = $(wildcard ./*/)
+
+all: .PHONY
+.PHONY: $(TESTCASE_DIRECTORIES)
+
+$(TESTCASE_DIRECTORIES):
+	make -C $@ test

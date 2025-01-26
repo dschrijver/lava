@@ -4,6 +4,8 @@
 #include "../include/collide.h"
 
 
+#ifdef FLOW
+
 void collide_hydrodynamic_populations() {
 
     double rho_i, u_i, v_i, Fx_i, Fy_i, u2, uc, feq, S;
@@ -33,6 +35,10 @@ void collide_hydrodynamic_populations() {
 
 }
 
+#endif
+
+
+#ifdef TEMPERATURE
 
 void collide_thermal_populations() {
 
@@ -104,3 +110,5 @@ void collide_thermal_populations() {
     }
 
 }
+
+#endif

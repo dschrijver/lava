@@ -14,7 +14,7 @@
 
 int main(void) {
 
-#ifdef ANIMATE
+#ifdef ANIMATION
     initialize_animation();
 #endif
 
@@ -43,7 +43,7 @@ int main(void) {
         }
 #endif
 
-#ifdef ANIMATE
+#ifdef ANIMATION
         if ((t % NFRAME) == 0) {
             if (!render_frame()) break;
         }
@@ -93,7 +93,7 @@ int main(void) {
 
     free_memory();
 
-#ifdef ANIMATE
+#ifdef ANIMATION
     close_animation();
 #endif
 

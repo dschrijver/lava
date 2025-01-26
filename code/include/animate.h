@@ -2,6 +2,9 @@
 #define ANIMATE_H
 
 
+#include "../constants.h"
+
+#ifdef ANIMATION
 /**
  * @brief Initialize the Raylib animation.
  */
@@ -16,5 +19,7 @@ void close_animation();
  * @brief Render a frame with the current macroscopic quantity.
  */
 int render_frame();
+
+#endif
 
 #endif

@@ -6,9 +6,10 @@
 
 void calculate_body_forces() {
 
-#ifdef PHASECHANGE
-    
     double Fx_i, Fy_i;
+
+#ifdef PHASECHANGE
+
     double phi_i, phi2, rho_i;
 
 #endif

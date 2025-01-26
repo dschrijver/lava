@@ -8,7 +8,11 @@
 
 void initialize() {
 
+#ifdef FLOW
+
     double u2, uc;
+
+#endif
 
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
@@ -42,16 +46,16 @@ void initialize() {
     #endif
 
     #ifdef TEMPERATURE_CONSTANT_VERTICAL_GRADIENT
-            T[INDEX_2D(i,j)] = (T_top-T_bottom)/(double)NY*((double)j + 0.5) + T_bottom;
+            T[INDEX_2D(i,j)] = (T_ini_top-T_ini_bottom)/(double)NY*((double)j + 0.5) + T_bottom;
     #endif
 
     #ifdef TEMPERATURE_CHANNEL
             if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
                 ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
-                T[INDEX_2D(i,j)] = T_solid;
+                T[INDEX_2D(i,j)] = T_ini_solid;
             }
             else {
-                T[INDEX_2D(i,j)] = T_liquid; 
+                T[INDEX_2D(i,j)] = T_ini_liquid; 
             }
     #endif
 
@@ -111,6 +115,7 @@ void initialize() {
     
 }
 
+#ifdef FLOW
 
 void shift_velocity() {
 
@@ -127,3 +132,5 @@ void shift_velocity() {
     }
 
 }
+
+#endif

@@ -7,8 +7,9 @@
 #include "../include/animate.h"
 
 
-static double time_last_frame;
+#ifdef ANIMATION
 
+static double time_last_frame;
 
 void initialize_animation() {
 
@@ -38,11 +39,17 @@ int render_frame() {
     char frame_string[32];
 
 #if defined ANIMATE_T
+
     macroscopic_quantity = T;
+
 #elif defined ANIMATE_U
+
     macroscopic_quantity = u;
+
 #elif defined ANIMATE_PHI
+
     macroscopic_quantity = phi;
+
 #endif
 
     double min_value = calculate_minimum_macroscopic_quantity(macroscopic_quantity);
@@ -79,3 +86,4 @@ int render_frame() {
 
 }
 
+#endif
