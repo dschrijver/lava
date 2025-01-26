@@ -41,6 +41,8 @@ int render_frame() {
     macroscopic_quantity = T;
 #elif defined ANIMATE_U
     macroscopic_quantity = u;
+#elif defined ANIMATE_PHI
+    macroscopic_quantity = phi;
 #endif
 
     double min_value = calculate_minimum_macroscopic_quantity(macroscopic_quantity);

@@ -33,9 +33,6 @@ void initialize() {
             v[INDEX_2D(i,j)] = v_ini_amplitude*sin(2.0*M_PI*v_ini_frequency*((double)j + 0.5)/(double)NY);
     #endif
 
-            Fx[INDEX_2D(i,j)] = Fx_body;
-            Fy[INDEX_2D(i,j)] = Fy_body;
-
 #endif
 
 #ifdef TEMPERATURE
@@ -48,13 +45,35 @@ void initialize() {
             T[INDEX_2D(i,j)] = (T_top-T_bottom)/(double)NY*((double)j + 0.5) + T_bottom;
     #endif
 
-    #ifdef FLOW
-            Fy[INDEX_2D(i,j)] += alpha * (T[INDEX_2D(i,j)] - T_top) * g;
+    #ifdef TEMPERATURE_CHANNEL
+            if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
+                ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
+                T[INDEX_2D(i,j)] = T_solid;
+            }
+            else {
+                T[INDEX_2D(i,j)] = T_liquid; 
+            }
     #endif
 
-    #ifdef PHASECHANGE
+#endif
+
+#ifdef PHASECHANGE
+
+    #ifdef PHI_CONSTANT_VALUE
             phi[INDEX_2D(i,j)] = phi_ini;
             phi_old[INDEX_2D(i,j)] = phi_ini;
+    #endif
+    
+    #ifdef PHI_CHANNEL
+            if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
+                ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
+                phi[INDEX_2D(i,j)] = 0.0;
+                phi_old[INDEX_2D(i,j)] = 0.0;
+            }
+            else {
+                phi[INDEX_2D(i,j)] = 1.0;
+                phi_old[INDEX_2D(i,j)] = 1.0;
+            }
     #endif
 
 #endif

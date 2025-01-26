@@ -12,7 +12,7 @@ static double cs2 = 1.0/3.0;
 
 // --- SETTINGS ---
 // Solve the Navier-Stokes equations, making the fluid move under forces and pressure differences. 
-#undef FLOW
+#define FLOW
 // Use the Shan-Chen method to simulate two (partially) immiscible fluids.
 #undef DUALCOMPONENT
 // Solve the Advection-Diffusion Equation for the temperature field. 
@@ -22,18 +22,24 @@ static double cs2 = 1.0/3.0;
 
 
 // --- BOUNDARY CONDITIONS ---
-#define XPERIODIC
+#undef XPERIODIC
 #undef WEST_NOSLIP
 #undef EAST_NOSLIP
-#undef WEST_PRESSURE_WETNODE_NEBB
-#undef EAST_PRESSURE_WETNODE_NEBB
+#define WEST_PRESSURE_WETNODE_NEBB
+#define EAST_PRESSURE_WETNODE_NEBB
+#define WEST_TEMPERATURE_WETNODE_NEBB_CONSTANT_VALUE
+#define EAST_TEMPERATURE_WETNODE_NEBB_CONSTANT_GRADIENT
 
 #ifdef WEST_PRESSURE_WETNODE_NEBB
     static double rho_left = 1.0;
 #endif
 
 #ifdef EAST_PRESSURE_WETNODE_NEBB
-    static double rho_right = 1.0 - 32e-5*3.0;
+    static double rho_right = 1.0 - 200e-5*3.0;
+#endif
+
+#ifdef WEST_TEMPERATURE_WETNODE_NEBB_CONSTANT_VALUE
+    static double T_left = 0.0526;
 #endif
 
 #undef YPERIODIC
@@ -41,26 +47,28 @@ static double cs2 = 1.0/3.0;
 #define NORTH_NOSLIP_HALFWAY_BOUNCEBACK
 
 #ifdef SOUTH_NOSLIP_HALFWAY_BOUNCEBACK
-    static double T_bottom = -1.0/0.95;
+    static double T_bottom = -1.0;
 #endif
 
 #ifdef NORTH_NOSLIP_HALFWAY_BOUNCEBACK
-    static double T_top = 0.0;
+    static double T_top = -1.0;
 #endif
 
 
 // --- INITIAL CONDITIONS ---
-#define DENSITY_UNITY
-#undef DENSITY_CONSTANT_HORIZONTAL_GRADIENT
+#undef DENSITY_UNITY
+#define DENSITY_CONSTANT_HORIZONTAL_GRADIENT
 #define VELOCITY_ZERO
 #undef VELOCITY_SINE
-#define TEMPERATURE_CONSTANT_VALUE
+#undef TEMPERATURE_CONSTANT_VALUE
 #undef TEMPERATURE_CONSTANT_VERTICAL_GRADIENT
-#define PHI_CONSTANT_VALUE
+#define TEMPERATURE_CHANNEL
+#undef PHI_CONSTANT_VALUE
+#define PHI_CHANNEL
 
 #ifdef DENSITY_CONSTANT_HORIZONTAL_GRADIENT
     static double rho_ini_left = 1.0;
-    static double rho_ini_right = 1.0 - 32e-5*3.0;
+    static double rho_ini_right = 1.0 - 200e-5*3.0;
 #endif
 
 #ifdef VELOCITY_SINE
@@ -71,41 +79,52 @@ static double cs2 = 1.0/3.0;
 #endif
 
 #ifdef TEMPERATURE_CONSTANT_VALUE
-    static double T_ini = 0.0;
+    static double T_ini = 0.0526;
+#endif
+
+#ifdef TEMPERATURE_CHANNEL
+    static double T_solid = -1.0;
+    static double T_liquid = 0.0526;
 #endif
 
 #ifdef PHI_CONSTANT_VALUE
     static double phi_ini = 1.0;
 #endif
 
+#ifdef PHI_CHANNEL
+    static double channel_width = 100.0;
+#endif
+
 
 // --- PARAMETERS ---
 // Number of timesteps
-#define NTIME   1000000
+#define NTIME   100000
 // Store macroscopic quantities after NSTORE timesteps        
-#define NSTORE  10000
+#define NSTORE  1000
 // Print progress percentage after NLOG timesteps
-#define NLOG    100
+#define NLOG    1
 // Output macroscopic quantities to h5 files
-#define OUTPUT
+#undef OUTPUT
 // Animate a macroscopic quantity
-#undef ANIMATE
+#define ANIMATE
 
 // Animate the x-component of the velocity
 #undef ANIMATE_U
 // Animate the temperature
-#define ANIMATE_T
+#undef ANIMATE_T
+// Animate the liquid fraction
+#define ANIMATE_PHI
 // Number of pixels per cell, must be at least 2
-#define CELL_SIZE 8
+#define CELL_SIZE 3
 // Render a frame of the macroscopic quantity after NFRAME steps
-#define NFRAME  100
+#define NFRAME  6
 // Title of animation window
-#define ANIMATION_TITLE "Rayleigh-Benard"
+#define ANIMATION_TITLE "Channel"
 
 // Number of cells in the x-direction
-#define NX 4
+#define NX 200
 // Number of cells in the y-direction
-#define NY 2048
+#define NY 300
 
 // FLOW
 static double tau = 1.0;
@@ -118,16 +137,16 @@ static double tau_air = 0.625;
 static double G = 4.0;
 
 // TEMPERATURE
-static double tau_g = 0.5017801724872908;
-static double alpha = 207e-6;
+static double tau_g = 1.0;
+static double alpha = 0.0;
 static double g = 0.009661835748792274;
 
 // PHASECHANGE
-static double tau_g_liquid = 0.50498;
-static double tau_g_solid = 0.50498;
+static double tau_g_liquid = 1.0;
+static double tau_g_solid = 1.0;
 static double c_liquid = 0.95;
 static double c_solid = 0.95;
-static double L_f = 1.0;
+static double L_f = 0.1;
 static double T_m = 0.0;
 
 #endif

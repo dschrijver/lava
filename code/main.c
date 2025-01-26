@@ -22,6 +22,10 @@ int main(void) {
 
     initialize();
 
+#ifdef FLOW
+    calculate_body_forces();
+#endif
+
 #ifdef OUTPUT
     output_data(0);
 #endif
