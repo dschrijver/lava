@@ -3,9 +3,9 @@
 #include <hdf5.h>
 
 
-#define NTIME   1000000
-#define NSTORE  10000
-#define NLOG    100
+#define NTIME   10
+#define NSTORE  1
+#define NLOG    1
 
 #define NX 32
 #define NY 128
@@ -134,6 +134,10 @@ int main(void) {
 
             f1[INDEX_3D(0,j,7)] = f1[INDEX_3D(0,j,8)] + 0.5*(f1[INDEX_3D(0,j,3)] - f1[INDEX_3D(0,j,4)]) + 1.0/6.0*u_i;
 
+            if (j == 0) {
+                printf("%f %f %f\n", f1[INDEX_3D(0,j,1)], f1[INDEX_3D(0,j,5)], f1[INDEX_3D(0,j,7)]);
+            }
+
             u_i = -1.0 + 1.0/(1.0-Delta_p/cs2)*(f1[INDEX_3D(NX-1,j,0)] + f1[INDEX_3D(NX-1,j,3)] + f1[INDEX_3D(NX-1,j,4)] + 2.0*(f1[INDEX_3D(NX-1,j,1)] + f1[INDEX_3D(NX-1,j,5)] + f1[INDEX_3D(NX-1,j,7)]));
 
             f1[INDEX_3D(NX-1,j,2)] = f1[INDEX_3D(NX-1,j,1)] - 2.0/3.0*(1.0-Delta_p/cs2)*u_i;
@@ -159,11 +163,11 @@ int main(void) {
             }
         }
 
-        // Log the progress
-        if (((t+1) % NLOG) == 0) {
-            printf("\rProgress: %.2f%%", ((double)(t+1))/((double)NTIME)*100.0);
-            fflush(stdout);
-        }
+        // // Log the progress
+        // if (((t+1) % NLOG) == 0) {
+        //     printf("\rProgress: %.2f%%", ((double)(t+1))/((double)NTIME)*100.0);
+        //     fflush(stdout);
+        // }
     }
 
     output_data(NTIME, noutput);

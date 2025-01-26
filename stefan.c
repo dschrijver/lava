@@ -5,12 +5,12 @@
 
 
 // --- SETTINGS ---
-#define NTIME   10          // Number of timesteps
-#define NSTORE  1            // Store macroscopic quantities after NSTORE timesteps
-#define NLOG    1             // Print progress percentage after NLOG timesteps
+#define NTIME   1000000          // Number of timesteps
+#define NSTORE  10000            // Store macroscopic quantities after NSTORE timesteps
+#define NLOG    100             // Print progress percentage after NLOG timesteps
 
-#define NX 20                  // Number of cells in the x-direction
-#define NY 40                  // Number of cells in the y-direction
+#define NX 4                  // Number of cells in the x-direction
+#define NY 2048                  // Number of cells in the y-direction
 #define NP 9                    // Number of velocity directions, DON'T CHANGE!
 
 // --- PHYSICAL CONSTANTS ---
