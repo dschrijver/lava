@@ -161,6 +161,10 @@
     static double u_ini_frequency = 1.0;
     static double v_ini_frequency = 1.0;
 #endif
+#undef VELOCITY_CHANNEL
+#ifdef VELOCITY_CHANNEL
+    static double dp_dx = 1e-5;
+#endif
 
 /*───────────────────── Temperature Initial Conditions ──────────────────────*/
 // Initialize the temperature as a constant value.

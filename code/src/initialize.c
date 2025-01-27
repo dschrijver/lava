@@ -14,6 +14,16 @@ void initialize() {
 
 #endif
 
+#ifdef VELOCITY_CHANNEL
+
+    double y, y_shift;
+
+    double d = channel_width / 2.0;
+    double nu = cs2*(tau - 0.5);
+    double offset = ((double)NY-channel_width) / 2.0;
+
+#endif
+
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
             
@@ -35,6 +45,19 @@ void initialize() {
     #ifdef VELOCITY_SINE
             u[INDEX_2D(i,j)] = u_ini_amplitude*sin(2.0*M_PI*u_ini_frequency*((double)i + 0.5)/(double)NX);
             v[INDEX_2D(i,j)] = v_ini_amplitude*sin(2.0*M_PI*v_ini_frequency*((double)j + 0.5)/(double)NY);
+    #endif
+
+    #ifdef VELOCITY_CHANNEL
+            y = (double)j + 0.5;
+
+            if ((y > offset) && (y < offset + channel_width)) {
+                y_shift = (double)j + 0.5 - d - offset;
+                u[INDEX_2D(i,j)] = dp_dx/(2.0*nu)*(d*d - y_shift*y_shift);
+            } else {
+                u[INDEX_2D(i,j)] = 0.0;
+            }
+            
+            v[INDEX_2D(i,j)] = 0.0;
     #endif
 
 #endif

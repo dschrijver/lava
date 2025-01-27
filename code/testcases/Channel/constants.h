@@ -24,7 +24,7 @@
 // Output macroscopic quantities to h5 files.
 #undef OUTPUT
 // Store macroscopic quantities in an h5 file after NSTORE timesteps.    
-#define NSTORE      100000
+#define NSTORE      1000
 
 /*───────────────────────────── Animation ───────────────────────────────────*/
 // Animate a macroscopic quantity.
@@ -152,7 +152,7 @@
 
 /*───────────────────── Velocity Initial Conditions ─────────────────────────*/
 // Initialize the velocity as zero.
-#define VELOCITY_ZERO
+#undef VELOCITY_ZERO
 // Initialize both velocity components as a sine wave. 
 #undef VELOCITY_SINE
 #ifdef VELOCITY_SINE
@@ -160,6 +160,10 @@
     static double v_ini_amplitude = 0.0001;
     static double u_ini_frequency = 1.0;
     static double v_ini_frequency = 1.0;
+#endif
+#define VELOCITY_CHANNEL
+#ifdef VELOCITY_CHANNEL
+    static double dp_dx = 1e-5;
 #endif
 
 /*───────────────────── Temperature Initial Conditions ──────────────────────*/
