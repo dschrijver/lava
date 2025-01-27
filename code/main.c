@@ -31,7 +31,7 @@ int main(void) {
 #endif
 
 #ifdef FLOW
-    shift_velocity();
+    shift_velocity_initial();
 #endif
 
     // --- MAIN LOOP ---
@@ -66,10 +66,6 @@ int main(void) {
 #endif
 
 #ifdef FLOW
-        calculate_body_forces();
-#endif
-
-#ifdef FLOW
         collide_hydrodynamic_populations();
 #endif
 
@@ -79,6 +75,14 @@ int main(void) {
 
 #ifdef FLOW
         calculate_hydrodynamic_macroscopic_quantities();
+#endif
+
+#ifdef FLOW
+        calculate_body_forces();
+#endif
+
+#ifdef FLOW
+        shift_velocity();
 #endif
 
         if (((t+1) % NLOG) == 0) {

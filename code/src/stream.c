@@ -10,6 +10,12 @@ void stream_hydrodynamic_populations() {
 
     int x_i, y_i;
 
+#ifdef DUALCOMPONENT
+
+    int p_i;
+
+#endif
+
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
             for (int p = 0; p < NP; p++) {
@@ -22,30 +28,59 @@ void stream_hydrodynamic_populations() {
                 else if (x_i == NX) x_i = 0;
 #endif
 
-#ifdef WEST_PRESSURE_NEBB
+#ifndef DUALCOMPONENT
+
+    #ifdef WEST_PRESSURE_NEBB
                 if (x_i < 0) continue;
-#endif
+    #endif
 
-#ifdef EAST_PRESSURE_NEBB
+    #ifdef EAST_PRESSURE_NEBB
                 if (x_i == NX) continue;
-#endif
+    #endif
 
-#ifdef SOUTH_NOSLIP_HALFWAY_BOUNCEBACK
+    #ifdef SOUTH_NOSLIP_HALFWAY_BOUNCEBACK
                 if (y_i < 0) {
                     f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(i, j, p_bounceback[p])];
                     continue;
                 }
-#endif
+    #endif
 
-#ifdef NORTH_NOSLIP_HALFWAY_BOUNCEBACK
+    #ifdef NORTH_NOSLIP_HALFWAY_BOUNCEBACK
                 if (y_i == NY) {
                     f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(i, j, p_bounceback[p])];
                     continue;
                 }
-#endif
+    #endif
 
                 f1[INDEX_3D(i,j,p)] = f2[INDEX_3D(x_i, y_i, p)];
-                
+
+#endif
+
+#ifdef DUALCOMPONENT
+
+    #ifdef SOUTH_NOSLIP_HALFWAY_BOUNCEBACK
+                if (y_i < 0) {
+                    p_i = p_bounceback[p];
+                    f1_lava[INDEX_3D(i,j,p)] = f2_lava[INDEX_3D(i, j, p_i)];
+                    f1_air[INDEX_3D(i,j,p)] = f2_air[INDEX_3D(i, j, p_i)];
+                    continue;
+                }
+    #endif
+
+    #ifdef NORTH_NOSLIP_HALFWAY_BOUNCEBACK
+                if (y_i == NY) {
+                    p_i = p_bounceback[p];
+                    f1_lava[INDEX_3D(i,j,p)] = f2_lava[INDEX_3D(i, j, p_i)];
+                    f1_air[INDEX_3D(i,j,p)] = f2_air[INDEX_3D(i, j, p_i)];
+                    continue;
+                }
+    #endif
+
+                f1_lava[INDEX_3D(i,j,p)] = f2_lava[INDEX_3D(x_i, y_i, p)];
+                f1_air[INDEX_3D(i,j,p)] = f2_air[INDEX_3D(x_i, y_i, p)];
+
+#endif
+
             }
         }
     }

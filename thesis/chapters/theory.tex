@@ -524,4 +524,56 @@ We choose $c_p^{\text{liquid}} = c_p^{\text{solid}} = 0.95$, $L_f = 1$, $\textit
     \caption{Position of interface over time, compared to the analytical solution.}\label{fig:stefan}
 \end{figure}
 
-\subsection{Phase change in multicomponent fluid}
+\subsection{Phase change in two-component fluid}
+Only the lava can change phase. We use one distribution function for the temperature, where the relaxation time is computed as:
+
+\begin{equation}
+    \tau_g = \frac{\rho_{\text{lava}}}{\rho} \left(\phi_{l,\text{lava}}\tau_{g,\text{lava}}^{\text{liquid}} + \left(1-\phi_{l,\text{lava}}\right)\tau_{g,\text{lava}}^{\text{solid}}\right) + \frac{\rho_{\text{air}}}{\rho}\tau_{g,\text{air}}
+\end{equation}
+
+\subsection{Algorithm phase change in two-component fluid}
+
+We define the following:
+
+\begin{equation}
+    \hat{\bm{u}}(t) = \bm{u}(t) - \frac{1}{2 \rho(t)} \sum_\sigma \bm{F}^\sigma(t)
+\end{equation}
+\begin{equation}
+    \bm{u}^*(t+1) = \frac{1}{\rho(t+1)}\sum_\sigma \sum_i f_i^\sigma(t+1) \bm{c}_i
+\end{equation}
+\begin{equation}
+    \bm{u}(t+1) = \bm{u}^*(t+1) + \frac{1}{2 \rho(t+1)} \sum_\sigma \bm{F}^\sigma(t+1)
+\end{equation}
+
+We can define a general algorithm with 2 components, where one can change phase, as:
+
+\clearpage
+
+\begin{itemize}\label{it:Algorithm phase change in two-component fluid}
+    \item[(i)] Choose $\rho^{\text{lava}}(t_0)$, $\rho^{\text{air}}(t_0)$, $\bm{u}(t_0)$, $T(t_0)$ and $\phi_l^{\text{lava}}(t_0)$,
+    \item[(ii)] $\rho(t_0) = \rho^{\text{lava}}(t_0) + \rho^{\text{air}}(t_0)$,
+    \item[(iii)] $\phi_l^{\text{lava}}(t_0-1) = \phi_l^{\text{lava}}(t_0)$,
+    \item[(iv)] Compute $\bm{F}^\sigma_{\text{body}}(t_0)$ using $\rho^\sigma(t_0)$.
+    \item[(v)] Compute $\bm{F}^\sigma_{\text{buoy}}(t_0)$ using $\rho^\sigma(t_0)$ and $T(t_0)$.
+    \item[(vi)] Compute $\bm{F}^\sigma_{\text{SC}}(t_0)$ using $\rho^\sigma(t_0)$.
+    \item[(vii)] $\bm{f}^\sigma(t_0) = \bm{f}^{\text{eq},\sigma}\bigl(\rho^\sigma(t_0), \hat{\bm{u}}(t_0)\bigr)$.
+    \item[(viii)] $\bm{g}(t_0) = \bm{g}^{\text{eq}}\bigl(T(t_0), \hat{\bm{u}}(t_0)\bigr)$
+    \item[(ix)] $t = t_0$.
+    \item[1.] Finalize when $t = t_{\text{final}}$.
+    \item[2.] Compute $\bm{g}^{\text{eq}}(t)$ using $T(t)$ and $\bm{u}(t)$.
+    \item[3.] Collide $\bm{g}^*(t)$ using $\bm{g}(t)$, $\bm{g}^{\text{eq}}(t)$, $\rho(t)$, $\phi_l^{\text{lava}}(t-1)$ and $\phi_l^{\text{lava}}(t)$.
+    \item[4.] Stream $\bm{g}(t+1)$ using $\bm{g}^*(t)$ and $\phi_l^{\text{lava}}(t)$.
+    \item[5.] Compute $T(t+1)$ using $\bm{g}(t+1)$.
+    \item[6.] Compute $\bm{f}^{\text{eq},\sigma}(t)$ using $\rho^\sigma(t)$ and $\bm{u}(t)$.
+    \item[7.] Compute $S_i^\sigma(t)$ using $\bm{u}(t)$ and $\bm{F}^\sigma(t)$. 
+    \item[8.] Collide $\bm{f}^{*, \sigma}(t)$ using $\bm{f}^\sigma(t)$, $\bm{f}^{\text{eq},\sigma}(t)$, $\rho(t)$ and $S_i^\sigma(t)$.
+    \item[9.] Stream $\bm{f}^\sigma(t+1)$ using $\bm{f}^{*, \sigma}(t)$. 
+    \item[10.] Compute $\rho^\sigma(t+1)$, $\rho(t+1)$ and $\bm{u}^\ast(t+1)$ using $\bm{f}^\sigma(t+1)$.
+    \item[11.] Compute $\bm{F}^\sigma_{\text{body}}(t+1)$ using $\rho^\sigma(t+1)$.
+    \item[12.] Compute $\bm{F}^\sigma_{\text{buoy}}(t+1)$ using $\rho^\sigma(t+1)$ and $T(t+1)$.
+    \item[13.] Compute $\bm{F}^\sigma_{\text{SC}}(t+1)$ using $\rho^\sigma(t+1)$.
+    \item[14.] Compute $\bm{u}(t+1)$ using $\bm{u}^\ast(t+1)$, $\rho(t+1)$ and $\bm{F}^\sigma(t+1)$.
+    \item[15.] Compute $H^{\text{lava}}(t+1)$ using $T(t+1)$, $\phi_l^{\text{lava}}(t)$.
+    \item[16.] Compute $\phi_l^{\text{lava}}(t+1)$ using $H^{\text{lava}}(t+1)$.
+    \item[17.] $t \rightarrow t+1$, return to step 1. 
+\end{itemize}

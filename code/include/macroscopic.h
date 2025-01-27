@@ -13,6 +13,15 @@ void calculate_hydrodynamic_macroscopic_quantities();
 
 #endif
 
+#ifdef FLOW
+
+/**
+ * @brief Shift the velocity fields due to body forces.
+ */
+void shift_velocity();
+
+#endif
+
 #ifdef TEMPERATURE
 
 /**

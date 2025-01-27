@@ -14,6 +14,10 @@ void initialize() {
 
 #endif
 
+#ifdef DENSITY_TWO_COMPONENT_POISEUILLE
+    double y;
+#endif
+
 #ifdef VELOCITY_CHANNEL
 
     double y, y_shift;
@@ -35,6 +39,21 @@ void initialize() {
 
     #ifdef DENSITY_CONSTANT_HORIZONTAL_GRADIENT
             rho[INDEX_2D(i,j)] = rho_ini_left + (rho_ini_right - rho_ini_left)/(double)(NX-1) * (double)i;
+    #endif
+
+    #ifdef DENSITY_TWO_COMPONENT_POISEUILLE
+            rho[INDEX_2D(i,j)] = 1.0;
+            y = (double)j + 0.5;
+            
+            if((y > ((double)NY-center_width) / 2.0) && 
+               (y < ((double)NY-center_width) / 2.0 + center_width)) {
+                rho_lava[INDEX_2D(i,j)] = 0.0;
+                rho_air[INDEX_2D(i,j)] = 1.0;
+            }
+            else {
+                rho_lava[INDEX_2D(i,j)] = 1.0;
+                rho_air[INDEX_2D(i,j)] = 0.0;
+            }
     #endif
 
     #ifdef VELOCITY_ZERO
@@ -140,7 +159,7 @@ void initialize() {
 
 #ifdef FLOW
 
-void shift_velocity() {
+void shift_velocity_initial() {
 
     double rho_i;
 
@@ -148,8 +167,20 @@ void shift_velocity() {
         for (int j = 0; j < NY; j++) {
 
             rho_i = rho[INDEX_2D(i,j)];
+
+#ifndef DUALCOMPONENT
+
             u[INDEX_2D(i,j)] -= Fx[INDEX_2D(i,j)]/(2.0*rho_i);
             v[INDEX_2D(i,j)] -= Fy[INDEX_2D(i,j)]/(2.0*rho_i);
+
+#endif
+
+#ifdef DUALCOMPONENT
+
+            u[INDEX_2D(i,j)] -= (Fx_lava[INDEX_2D(i,j)] + Fx_air[INDEX_2D(i,j)])/(2.0*rho_i);
+            v[INDEX_2D(i,j)] -= (Fy_lava[INDEX_2D(i,j)] + Fy_air[INDEX_2D(i,j)])/(2.0*rho_i);
+
+#endif
 
         }
     }

@@ -16,6 +16,7 @@
 \contentsline {subsection}{\numberline {2.14}Phase change}{15}{subsection.2.14}%
 \contentsline {subsection}{\numberline {2.15}Algorithm phase change}{15}{subsection.2.15}%
 \contentsline {subsection}{\numberline {2.16}Stefan problem}{16}{subsection.2.16}%
-\contentsline {subsection}{\numberline {2.17}Phase change in multicomponent fluid}{16}{subsection.2.17}%
-\contentsline {section}{\numberline {3}Results}{17}{section.3}%
-\contentsline {section}{\numberline {4}Appendix}{19}{section.4}%
+\contentsline {subsection}{\numberline {2.17}Phase change in two-component fluid}{17}{subsection.2.17}%
+\contentsline {subsection}{\numberline {2.18}Algorithm phase change in two-component fluid}{17}{subsection.2.18}%
+\contentsline {section}{\numberline {3}Results}{19}{section.3}%
+\contentsline {section}{\numberline {4}Appendix}{21}{section.4}%

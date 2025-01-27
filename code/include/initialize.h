@@ -14,7 +14,7 @@ void initialize();
 /**
  * @brief Shift initial velocity by local force.
  */
-void shift_velocity();
+void shift_velocity_initial();
 
 #endif
 

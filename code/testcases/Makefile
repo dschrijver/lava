@@ -1,7 +1,7 @@
-CHOSEN_TESTCASES = poiseuille-body poiseuille-pressure stefan channel
+CHOSEN_TESTCASES = poiseuille-body poiseuille-pressure stefan channel poiseuille-dual
 
 
-all: poiseuille-body poiseuille-pressure stefan channel
+all: poiseuille-body poiseuille-pressure stefan channel poiseuille-dual
 
 selection: $(CHOSEN_TESTCASES)
 
@@ -17,3 +17,6 @@ stefan:
 
 channel:
 	make -C Channel test
+
+ poiseuille-dual:
+	make -C Poiseuille_Dual_Component test

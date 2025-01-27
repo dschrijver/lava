@@ -8,7 +8,25 @@
 
 void collide_hydrodynamic_populations() {
 
-    double rho_i, u_i, v_i, Fx_i, Fy_i, u2, uc, feq, S;
+    double rho_i, u_i, v_i, u2, uc;
+
+#ifndef DUALCOMPONENT
+
+    double Fx_i, Fy_i;
+
+    double feq, S;
+
+#endif
+
+#ifdef DUALCOMPONENT
+
+    double rho_lava_i, rho_air_i;
+
+    double Fx_lava_i, Fy_lava_i, Fx_air_i, Fy_air_i;
+
+    double eq, Sx, Sy;
+
+#endif
 
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
@@ -16,17 +34,55 @@ void collide_hydrodynamic_populations() {
             rho_i = rho[INDEX_2D(i,j)];
             u_i = u[INDEX_2D(i,j)];
             v_i = v[INDEX_2D(i,j)];
+
+#ifndef DUALCOMPONENT
+
             Fx_i = Fx[INDEX_2D(i,j)];
             Fy_i = Fy[INDEX_2D(i,j)];
+
+#endif
+
+#ifdef DUALCOMPONENT
+
+            rho_lava_i = rho_lava[INDEX_2D(i,j)];
+            rho_air_i = rho_air[INDEX_2D(i,j)];
+
+            Fx_lava_i = Fx_lava[INDEX_2D(i,j)];
+            Fy_lava_i = Fy_lava[INDEX_2D(i,j)];
+
+            Fx_air_i = Fx_air[INDEX_2D(i,j)];
+            Fy_air_i = Fy_air[INDEX_2D(i,j)];
+
+#endif
+            
             u2 = u_i*u_i + v_i*v_i;
 
             for (int p = 0; p < NP; p++) {
 
                 uc = u_i*cx[p] + v_i*cy[p];
+
+#ifndef DUALCOMPONENT
+
                 feq = w[p]*rho_i*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+
                 S = (1.0 - 1.0/(2.0*tau))*w[p]*(((cx[p]-u_i)/cs2 + uc/(cs2*cs2)*cx[p])*Fx_i + 
                                                 ((cy[p]-u_i)/cs2 + uc/(cs2*cs2)*cy[p])*Fy_i);
+                
                 f2[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau)*f1[INDEX_3D(i,j,p)] + 1.0/tau*feq + S;
+
+#endif
+
+#ifdef DUALCOMPONENT
+
+                eq = w[p]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+                Sx = w[p]*((cx[p]-u_i)/cs2 + uc/(cs2*cs2)*cx[p]);
+                Sy = w[p]*((cy[p]-v_i)/cs2 + uc/(cs2*cs2)*cy[p]);
+
+                f2_lava[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau_lava)*f1_lava[INDEX_3D(i,j,p)] + 1.0/tau_lava*rho_lava_i*eq + (1.0 - 1.0/(2.0*tau_lava))*(Sx*Fx_lava_i + Sy*Fy_lava_i);
+
+                f2_air[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau_air)*f1_air[INDEX_3D(i,j,p)] + 1.0/tau_air*rho_air_i*eq + (1.0 - 1.0/(2.0*tau_air))*(Sx*Fx_air_i + Sy*Fy_air_i);
+
+#endif          
 
             }
 
