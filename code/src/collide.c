@@ -112,6 +112,12 @@ void collide_thermal_populations() {
 
 #endif
 
+#ifdef DUALCOMPONENT
+
+    double rho_i, rho_lava_i, rho_air_i;
+
+#endif
+
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
 
@@ -129,18 +135,24 @@ void collide_thermal_populations() {
 
             phi_i = phi[INDEX_2D(i,j)];
             Delta_phi = phi_i - phi_old[INDEX_2D(i,j)];
+
+    #ifdef DUALCOMPONENT
+            rho_i = rho[INDEX_2D(i,j)];
+            rho_lava_i = rho_lava[INDEX_2D(i,j)];
+            rho_air_i = rho_air[INDEX_2D(i,j)];
+
+            tau_g_effective = rho_lava_i/rho_i*(phi_i*tau_g_lava_liquid + (1.0-phi_i)*tau_g_lava_solid) + rho_air_i/rho_i*tau_g_air;
+    #else
             tau_g_effective = phi_i*tau_g_liquid + (1.0-phi_i)*tau_g_solid;
+    #endif
 
 #endif
             
             for (int p = 0; p < NP; p++) {
 
 #ifdef FLOW
+
                 uc = u_i*cx[p] + v_i*cy[p];
-
-#endif
-
-#ifdef FLOW
 
                 geq = w[p]*T_i*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
 
@@ -152,7 +164,11 @@ void collide_thermal_populations() {
 
 #ifdef PHASECHANGE
 
+    #ifdef DUALCOMPONENT
+                g2[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau_g_effective)*g1[INDEX_3D(i,j,p)] + 1.0/tau_g_effective*geq - rho_lava_i/rho_i*w[p]*L_f/c_solid*Delta_phi;
+    #else
                 g2[INDEX_3D(i,j,p)] = (1.0 - 1.0/tau_g_effective)*g1[INDEX_3D(i,j,p)] + 1.0/tau_g_effective*geq - w[p]*L_f/c_solid*Delta_phi;
+    #endif
 
 #else
 

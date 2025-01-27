@@ -7,13 +7,6 @@
 
 void calculate_body_forces() {
 
-
-#ifndef DUALCOMPONENT
-
-    double Fx_i, Fy_i;
-
-#endif
-
 #ifdef DUALCOMPONENT
 
     int x_i, y_i;
@@ -22,38 +15,24 @@ void calculate_body_forces() {
 
     double Fx_lava_i = 0.0, Fy_lava_i = 0.0, Fx_air_i = 0.0, Fy_air_i = 0.0;
 
+#else
+
+    double Fx_i, Fy_i;
+
+    #ifdef PHASECHANGE
+        double rho_i;
+    #endif
+
 #endif
 
-#if defined(PHASECHANGE) && !defined(DUALCOMPONENT)
+#ifdef PHASECHANGE
 
-    double phi_i, phi2, rho_i;
+    double phi_i, phi2;
 
 #endif
 
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-
-#ifndef DUALCOMPONENT
-
-            Fx_i = Fx_body;
-            Fy_i = Fy_body;
-
-    #ifdef TEMPERATURE
-            Fy_i += alpha*(T[INDEX_2D(i,j)] - T_top)*g;
-    #endif
-
-    #ifdef PHASECHANGE
-            phi_i = phi[INDEX_2D(i,j)];
-            phi2 = phi_i*phi_i;
-            rho_i = rho[INDEX_2D(i,j)];
-            Fx_i += -(1.0-phi2)*rho_i*u[INDEX_2D(i,j)];
-            Fy_i += -(1.0-phi2)*rho_i*v[INDEX_2D(i,j)];
-    #endif
-
-            Fx[INDEX_2D(i,j)] = Fx_i;
-            Fy[INDEX_2D(i,j)] = Fy_i;
-
-#endif
 
 #ifdef DUALCOMPONENT
 
@@ -93,11 +72,30 @@ void calculate_body_forces() {
 
             }
 
-            Fx_lava_i = -G*rho_lava_i*Fx_lava_i + rho_lava_i/rho_i*Fx_body;
-            Fy_lava_i = -G*rho_lava_i*Fy_lava_i + rho_lava_i/rho_i*Fy_body;
+            Fx_lava_i = -G*rho_lava_i*Fx_lava_i;
+            Fy_lava_i = -G*rho_lava_i*Fy_lava_i;
 
-            Fx_air_i = -G*rho_air_i*Fx_air_i + rho_air_i/rho_i*Fx_body;
-            Fy_air_i = -G*rho_air_i*Fy_air_i + rho_air_i/rho_i*Fy_body; 
+            Fx_air_i = -G*rho_air_i*Fx_air_i;
+            Fy_air_i = -G*rho_air_i*Fy_air_i; 
+
+            Fx_lava_i += rho_lava_i/rho_i*Fx_body;
+            Fy_lava_i += rho_lava_i/rho_i*Fy_body;
+
+            Fx_air_i += rho_air_i/rho_i*Fx_body;
+            Fy_air_i += rho_air_i/rho_i*Fy_body; 
+
+
+    #ifdef TEMPERATURE
+            Fy_lava_i += rho_lava_i/rho_i*alpha_lava*(T[INDEX_2D(i,j)] - T_0_lava)*g;
+            Fy_air_i += rho_air_i/rho_i*alpha_air*(T[INDEX_2D(i,j)] - T_0_air)*g;
+    #endif
+
+    #ifdef PHASECHANGE
+            phi_i = phi[INDEX_2D(i,j)];
+            phi2 = phi_i*phi_i;
+            Fx_lava_i += -(1.0-phi2)*rho_lava_i*u[INDEX_2D(i,j)];
+            Fy_lava_i += -(1.0-phi2)*rho_lava_i*v[INDEX_2D(i,j)];
+    #endif
 
             Fx_lava[INDEX_2D(i,j)] = Fx_lava_i;
             Fy_lava[INDEX_2D(i,j)] = Fy_lava_i;
@@ -105,6 +103,26 @@ void calculate_body_forces() {
             Fx_air[INDEX_2D(i,j)] = Fx_air_i;
             Fy_air[INDEX_2D(i,j)] = Fy_air_i;
             
+#else
+
+            Fx_i = Fx_body;
+            Fy_i = Fy_body;
+
+    #ifdef TEMPERATURE
+            Fy_i += alpha*(T[INDEX_2D(i,j)] - T_0)*g;
+    #endif
+
+    #ifdef PHASECHANGE
+            phi_i = phi[INDEX_2D(i,j)];
+            phi2 = phi_i*phi_i;
+            rho_i = rho[INDEX_2D(i,j)];
+            Fx_i += -(1.0-phi2)*rho_i*u[INDEX_2D(i,j)];
+            Fy_i += -(1.0-phi2)*rho_i*v[INDEX_2D(i,j)];
+    #endif
+
+            Fx[INDEX_2D(i,j)] = Fx_i;
+            Fy[INDEX_2D(i,j)] = Fy_i;
+
 #endif
 
         }

@@ -48,45 +48,73 @@
 /*                                SOLVERS                                     */
 /*────────────────────────────────────────────────────────────────────────────*/
 
-// Solve the Navier-Stokes equations, making the fluid move under forces and pressure differences. 
+/*─────────────────────────── Navier-Stokes Equation ────────────────────────*/
 #define FLOW
+/*───────────────────────────────────────────────────────────────────────────*/
 #ifdef FLOW
     static double Fx_body = 1e-5;
     static double Fy_body = 0.0;
 #endif
-// Use the Shan-Chen method to simulate two (partially) immiscible fluids.
+
+#ifdef FLOW
+/*───────────────────────────── Shan-Chen Method ────────────────────────────*/
 #define DUALCOMPONENT
+/*───────────────────────────────────────────────────────────────────────────*/
 #ifdef DUALCOMPONENT
     static double G = 4.0;
 #endif
-// Solve the Advection-Diffusion Equation for the temperature field. 
-#undef TEMPERATURE
+
+#endif
+
+/*─────────────────────── Advection-Diffusion Equation ──────────────────────*/
+#define TEMPERATURE
+/*───────────────────────────────────────────────────────────────────────────*/
 #ifdef TEMPERATURE
-    static double alpha = 0.0;
     static double g = 0.009661835748792274;
 #endif
-// Allow phase change using an Enthalpy method. The constant TEMPERATURE must be defined too.
-#undef PHASECHANGE
+
+#ifdef TEMPERATURE
+/*────────────────────────────── Enthalpy Method ────────────────────────────*/
+#define PHASECHANGE
+/*───────────────────────────────────────────────────────────────────────────*/
 #ifdef PHASECHANGE
     static double c_liquid = 0.95;
     static double c_solid = 0.95;
-    static double L_f = 0.1;
+    static double L_f = 1.0;
     static double T_melt = 0.0;
 #endif
 
+#endif
+
 /*───────────────────────────── Between Solvers ─────────────────────────────*/
-#if defined(FLOW) && defined(DUALCOMPONENT)
+#ifdef DUALCOMPONENT
     static double tau_lava = 1.0;
     static double tau_air = 0.625;
-#elif defined(FLOW) && !defined(DUALCOMPONENT)
+#else
     static double tau = 1.0;
 #endif
 
-#if defined(TEMPERATURE) && defined(PHASECHANGE)
+#if defined(PHASECHANGE) && defined(DUALCOMPONENT) 
+    static double tau_g_air = 0.53;
+    static double tau_g_lava_liquid = 0.53;
+    static double tau_g_lava_solid = 0.53;
+#elif defined(PHASECHANGE) && !defined(DUALCOMPONENT) 
     static double tau_g_liquid = 1.0;
     static double tau_g_solid = 1.0;
-#elif defined(TEMPERATURE) && !defined(PHASECHANGE)
+#elif !defined(PHASECHANGE) && defined(TEMPERATURE)
     static double tau_g = 1.0;
+#endif
+
+#if defined(TEMPERATURE) && defined(DUALCOMPONENT)
+    static double alpha_lava = 0.0;
+    static double alpha_air = 0.0;
+    static double T_0_lava = 0.0;
+    static double T_0_air = 0.0;
+#endif
+
+#if defined(TEMPERATURE) && !defined(DUALCOMPONENT)
+    static double alpha = 0.0;
+    static double T_0 = 293.0;
 #endif
 
 
@@ -112,27 +140,32 @@
     static double T_top = -1.0;
 #endif
 
+#ifdef FLOW
 /*───────────────────── Hydrodynamic Boundary Conditions ────────────────────*/
 // Apply a constant pressure on the WEST boundary using the Non-equilibrium Bounce-Back Method.
 #undef WEST_PRESSURE_NEBB
-#if defined (WEST_PRESSURE_NEBB) && defined(FLOW)
+#ifdef WEST_PRESSURE_NEBB
     static double rho_left = 1.0;
 #endif
 // Apply a constant pressure on the EAST boundary using the Non-equilibrium Bounce-Back Method.
 #undef EAST_PRESSURE_NEBB
-#if defined (EAST_PRESSURE_NEBB) && defined(FLOW)
+#ifdef EAST_PRESSURE_NEBB
     static double rho_right = 1.0 - 200e-5*3.0;
 #endif
 
+#endif
+
+#ifdef TEMPERATURE
 /*─────────────────────── Thermal Boundary Conditions ───────────────────────*/
 // Apply a constant temperature on the WEST wall using the Non-equilibrium Bounce-Back Method.
-#define WEST_TEMPERATURE_NEBB_CONSTANT_VALUE
+#undef WEST_TEMPERATURE_NEBB_CONSTANT_VALUE
 #if defined (WEST_TEMPERATURE_NEBB_CONSTANT_VALUE) && defined(TEMPERATURE)
     static double T_left = 0.0526;
 #endif
 // Apply a constant temperature gradient on the EAST wall using the Non-equilibrium Bounce-Back Method.
-#define EAST_TEMPERATURE_NEBB_CONSTANT_GRADIENT
+#undef EAST_TEMPERATURE_NEBB_CONSTANT_GRADIENT
 
+#endif
 
 
 
@@ -140,6 +173,7 @@
 /*                             INITIAL CONDITIONS                             */
 /*────────────────────────────────────────────────────────────────────────────*/
 
+#ifdef FLOW
 /*───────────────────── Density Initial Conditions ──────────────────────────*/
 // Initialize the density as 1.
 #undef DENSITY_UNITY
@@ -154,53 +188,65 @@
     static int center_width = 64;
 #endif
 
+#endif
+
+
+#ifdef FLOW
 /*───────────────────── Velocity Initial Conditions ─────────────────────────*/
 // Initialize the velocity as zero.
 #define VELOCITY_ZERO
 // Initialize both velocity components as a sine wave. 
 #undef VELOCITY_SINE
-#if defined(VELOCITY_SINE) && defined(FLOW)
+#ifdef VELOCITY_SINE
     static double u_ini_amplitude = 0.0001;
     static double v_ini_amplitude = 0.0001;
     static double u_ini_frequency = 1.0;
     static double v_ini_frequency = 1.0;
 #endif
 #undef VELOCITY_CHANNEL
-#if defined(VELOCITY_CHANNEL) && defined(FLOW) && defined(PHASECHANGE)
+#if defined(VELOCITY_CHANNEL) && defined(PHASECHANGE)
     static double dp_dx = 1e-5;
 #endif
 
+#endif
+
+#ifdef TEMPERATURE
 /*───────────────────── Temperature Initial Conditions ──────────────────────*/
 // Initialize the temperature as a constant value.
-#undef TEMPERATURE_CONSTANT_VALUE
-#if defined(TEMPERATURE_CONSTANT_VALUE) && defined(TEMPERATURE)
+#define TEMPERATURE_CONSTANT_VALUE
+#ifdef TEMPERATURE_CONSTANT_VALUE
     static double T_ini = 0.0526;
 #endif
 // Initialize the temperature as a constant gradient over the x-direction.
 #undef TEMPERATURE_CONSTANT_VERTICAL_GRADIENT
-#if defined(TEMPERATURE_CONSTANT_VERTICAL_GRADIENT) && defined(TEMPERATURE)
+#ifdef TEMPERATURE_CONSTANT_VERTICAL_GRADIENT
     static double T_ini_bottom = 294.0;
     static double T_ini_top = 293.0;
 #endif
 // Initialize the temperature to below the melting temperature near the channel walls, 
 // and above the melting temperature in the middle of the channel.
-#define TEMPERATURE_CHANNEL
-#if defined(TEMPERATURE_CHANNEL) && defined(TEMPERATURE) && defined(PHASECHANGE)
+#undef TEMPERATURE_CHANNEL
+#if defined(TEMPERATURE_CHANNEL) && defined(PHASECHANGE)
     static double T_ini_solid = -1.0;
     static double T_ini_liquid = 0.0526;
 #endif
 
+#endif
+
+#ifdef PHASECHANGE
 /*───────────────────── Liquid Fraction Initial Conditions ───────────────────*/
 // Initialize the liquid fraction as a constant value. 
-#undef PHI_CONSTANT_VALUE
-#if defined(PHI_CONSTANT_VALUE) && defined(PHASECHANGE)
+#define PHI_CONSTANT_VALUE
+#ifdef PHI_CONSTANT_VALUE
     static double phi_ini = 1.0;
 #endif
 // Initialize the liquid fraction to be 0 near the channel walls,
 // and 1 in the middle of the channel.
-#define PHI_CHANNEL
-#if defined(PHI_CHANNEL) && defined(PHASECHANGE)
+#undef PHI_CHANNEL
+#ifdef PHI_CHANNEL
     static double channel_width = 100.0;
+#endif
+
 #endif
 
 

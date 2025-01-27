@@ -5,17 +5,13 @@
 #include "../constants.h"
 
 /**
- * @brief Initialize macroscopic quantities and populations.
+ * @brief Initialize macroscopic quantities.
  */
-void initialize();
-
-#ifdef FLOW
+void initialize_macroscopic_quantities();
 
 /**
- * @brief Shift initial velocity by local force.
+ * @brief Initialize distribution functions.
  */
-void shift_velocity_initial();
-
-#endif
+void initialize_distribution_functions();
 
 #endif

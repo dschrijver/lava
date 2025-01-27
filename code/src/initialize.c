@@ -6,16 +6,12 @@
 #include "../include/initialize.h"
 
 
-void initialize() {
-
-#ifdef FLOW
-
-    double u2, uc;
-
-#endif
+void initialize_macroscopic_quantities() {
 
 #ifdef DENSITY_TWO_COMPONENT_POISEUILLE
+
     double y;
+
 #endif
 
 #ifdef VELOCITY_CHANNEL
@@ -30,18 +26,21 @@ void initialize() {
 
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
-            
-#ifdef FLOW
     
-    #ifdef DENSITY_UNITY
+#ifdef DENSITY_UNITY
+    
             rho[INDEX_2D(i,j)] = 1.0;
-    #endif
 
-    #ifdef DENSITY_CONSTANT_HORIZONTAL_GRADIENT
+#endif
+
+#ifdef DENSITY_CONSTANT_HORIZONTAL_GRADIENT
+
             rho[INDEX_2D(i,j)] = rho_ini_left + (rho_ini_right - rho_ini_left)/(double)(NX-1) * (double)i;
-    #endif
 
-    #ifdef DENSITY_TWO_COMPONENT_POISEUILLE
+#endif
+
+#ifdef DENSITY_TWO_COMPONENT_POISEUILLE
+
             rho[INDEX_2D(i,j)] = 1.0;
             y = (double)j + 0.5;
             
@@ -54,19 +53,25 @@ void initialize() {
                 rho_lava[INDEX_2D(i,j)] = 1.0;
                 rho_air[INDEX_2D(i,j)] = 0.0;
             }
-    #endif
 
-    #ifdef VELOCITY_ZERO
+#endif
+
+#ifdef VELOCITY_ZERO
+
             u[INDEX_2D(i,j)] = 0.0;
             v[INDEX_2D(i,j)] = 0.0;
-    #endif
 
-    #ifdef VELOCITY_SINE
+#endif
+
+#ifdef VELOCITY_SINE
+
             u[INDEX_2D(i,j)] = u_ini_amplitude*sin(2.0*M_PI*u_ini_frequency*((double)i + 0.5)/(double)NX);
             v[INDEX_2D(i,j)] = v_ini_amplitude*sin(2.0*M_PI*v_ini_frequency*((double)j + 0.5)/(double)NY);
-    #endif
 
-    #ifdef VELOCITY_CHANNEL
+#endif
+
+#ifdef VELOCITY_CHANNEL
+
             y = (double)j + 0.5;
 
             if ((y > offset) && (y < offset + channel_width)) {
@@ -77,21 +82,24 @@ void initialize() {
             }
             
             v[INDEX_2D(i,j)] = 0.0;
-    #endif
 
 #endif
 
-#ifdef TEMPERATURE
 
-    #ifdef TEMPERATURE_CONSTANT_VALUE
+#ifdef TEMPERATURE_CONSTANT_VALUE
+
             T[INDEX_2D(i,j)] = T_ini;
-    #endif
 
-    #ifdef TEMPERATURE_CONSTANT_VERTICAL_GRADIENT
+#endif
+
+#ifdef TEMPERATURE_CONSTANT_VERTICAL_GRADIENT
+
             T[INDEX_2D(i,j)] = (T_ini_top-T_ini_bottom)/(double)NY*((double)j + 0.5) + T_bottom;
-    #endif
 
-    #ifdef TEMPERATURE_CHANNEL
+#endif
+
+#ifdef TEMPERATURE_CHANNEL
+
             if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
                 ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
                 T[INDEX_2D(i,j)] = T_ini_solid;
@@ -99,18 +107,18 @@ void initialize() {
             else {
                 T[INDEX_2D(i,j)] = T_ini_liquid; 
             }
-    #endif
 
 #endif
 
-#ifdef PHASECHANGE
+#ifdef PHI_CONSTANT_VALUE
 
-    #ifdef PHI_CONSTANT_VALUE
             phi[INDEX_2D(i,j)] = phi_ini;
             phi_old[INDEX_2D(i,j)] = phi_ini;
-    #endif
+
+#endif
     
-    #ifdef PHI_CHANNEL
+#ifdef PHI_CHANNEL
+
             if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
                 ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
                 phi[INDEX_2D(i,j)] = 0.0;
@@ -120,71 +128,97 @@ void initialize() {
                 phi[INDEX_2D(i,j)] = 1.0;
                 phi_old[INDEX_2D(i,j)] = 1.0;
             }
-    #endif
 
 #endif
-
-#ifdef FLOW
-            u2 = u[INDEX_2D(i,j)]*u[INDEX_2D(i,j)] + v[INDEX_2D(i,j)]*v[INDEX_2D(i,j)];
-#endif
-
-            for (int p = 0; p < NP; p++) {
-
-#ifdef FLOW
-                uc = u[INDEX_2D(i,j)]*cx[p] + v[INDEX_2D(i,j)]*cy[p];
-#endif
-
-#ifdef FLOW
-
-                f1[INDEX_3D(i,j,p)] = w[p]*rho[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));;
-
-#endif
-
-#ifdef TEMPERATURE
-
-    #ifdef FLOW
-                g1[INDEX_3D(i,j,p)] = w[p]*T[INDEX_2D(i,j)]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
-    #else
-                g1[INDEX_3D(i,j,p)] = w[p]*T[INDEX_2D(i,j)];
-    #endif
-
-#endif
-                
-            }
             
         }
     }
     
 }
 
+
+void initialize_distribution_functions() {
+
 #ifdef FLOW
 
-void shift_velocity_initial() {
+    double rho_i, uhat, vhat, u2, uc;
 
-    double rho_i;
+    #ifdef DUALCOMPONENT
+        double eq, rho_lava_i, rho_air_i;
+    #else
+        double feq;
+    #endif
+
+#endif
+
+#ifdef TEMPERATURE
+
+    double T_i;
+
+#endif
 
     for (int i = 0; i < NX; i++) {
         for (int j = 0; j < NY; j++) {
 
-            rho_i = rho[INDEX_2D(i,j)];
+#ifdef FLOW
 
-#ifndef DUALCOMPONENT
+            rho_i  = rho[INDEX_2D(i,j)];
 
-            u[INDEX_2D(i,j)] -= Fx[INDEX_2D(i,j)]/(2.0*rho_i);
-            v[INDEX_2D(i,j)] -= Fy[INDEX_2D(i,j)]/(2.0*rho_i);
+    #ifdef DUALCOMPONENT
+            rho_lava_i = rho_lava[INDEX_2D(i,j)];
+            rho_air_i = rho_air[INDEX_2D(i,j)];
+
+            uhat = u[INDEX_2D(i,j)] - 1.0/(2.0*rho_i)*(Fx_lava[INDEX_2D(i,j)] + Fx_air[INDEX_2D(i,j)]);
+            vhat = v[INDEX_2D(i,j)] - 1.0/(2.0*rho_i)*(Fy_lava[INDEX_2D(i,j)] + Fy_air[INDEX_2D(i,j)]);
+    #else
+            uhat = u[INDEX_2D(i,j)] - 1.0/(2.0*rho_i)*Fx[INDEX_2D(i,j)];
+            vhat = v[INDEX_2D(i,j)] - 1.0/(2.0*rho_i)*Fy[INDEX_2D(i,j)];
+    #endif
 
 #endif
 
-#ifdef DUALCOMPONENT
+#ifdef TEMPERATURE
 
-            u[INDEX_2D(i,j)] -= (Fx_lava[INDEX_2D(i,j)] + Fx_air[INDEX_2D(i,j)])/(2.0*rho_i);
-            v[INDEX_2D(i,j)] -= (Fy_lava[INDEX_2D(i,j)] + Fy_air[INDEX_2D(i,j)])/(2.0*rho_i);
+            T_i = T[INDEX_2D(i,j)];
 
 #endif
+
+#ifdef FLOW
+
+            u2 = uhat*uhat + vhat*vhat;
+
+#endif
+
+            for (int p = 0; p < NP; p++) {
+
+#ifdef FLOW
+
+                uc = uhat*cx[p] + vhat*cy[p];
+
+    #ifdef DUALCOMPONENT
+                eq = w[p]*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+
+                f1_lava[INDEX_3D(i,j,p)] = rho_lava_i*eq;
+                f1_air[INDEX_3D(i,j,p)] = rho_air_i*eq;
+    #else
+                f1[INDEX_3D(i,j,p)] = w[p]*rho_i*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+    #endif
+
+#endif
+
+#ifdef TEMPERATURE
+
+    #ifdef FLOW
+                g1[INDEX_3D(i,j,p)] = w[p]*T_i*(1.0 + uc/cs2 + uc*uc/(2.0*cs2*cs2) - u2/(2.0*cs2));
+    #else
+                g1[INDEX_3D(i,j,p)] = w[p]*T_i;
+    #endif
+
+#endif
+
+            }
 
         }
     }
 
 }
-
-#endif

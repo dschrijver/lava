@@ -20,18 +20,16 @@ int main(void) {
 
     allocate_memory();
 
-    initialize();
+    initialize_macroscopic_quantities();
 
 #ifdef FLOW
     calculate_body_forces();
 #endif
 
+    initialize_distribution_functions();
+
 #ifdef OUTPUT
     output_data(0);
-#endif
-
-#ifdef FLOW
-    shift_velocity_initial();
 #endif
 
     // --- MAIN LOOP ---
