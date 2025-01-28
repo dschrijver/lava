@@ -545,7 +545,23 @@ We define the following:
     \bm{u}(t+1) = \bm{u}^*(t+1) + \frac{1}{2 \rho(t+1)} \sum_\sigma \bm{F}^\sigma(t+1)
 \end{equation}
 
-We can define a general algorithm with 2 components, where one can change phase, as:
+Furthermore, the Buoyancy force in a two-component fluid is given by:
+
+\begin{equation}
+\begin{split}
+    \bm{F}_{\text{buoy}} &= \left(\rho(T) - \rho_0\right) \bm{g}\\
+    &\approx \Biggl(\sum_\sigma \Bigl( \rho_0^\sigma \bigl( 1 - \alpha^\sigma \left(T - T_0^\sigma\right) \bigr)\Bigr)  - \sum_\sigma \rho_0^\sigma\Biggr) \bm{g}\\
+    &= -\sum_\sigma \rho_0^\sigma \alpha^\sigma \left(T - T_0^\sigma\right)\bm{g}
+\end{split}
+\end{equation}
+
+With $\rho_0 \equiv \rho(T_0)$. The component forces are computed by multiplying this force with the density fraction. Because only the lava can experience phase change, there will only be a force on the lava component due to penalization:
+
+\begin{equation}
+    F_{\text{pen}}^{\text{lava}} = -\left(1 - {\left(\phi_l^{\text{lava}}\right)}^2\right) \rho^{\text{lava}}\bm{u}
+\end{equation}
+
+Furthermore, for the source in the thermal collision step, we multiply it by $\frac{\rho^{\text{lava}}}{\rho}$. We can define a general algorithm with 2 components, where one can change phase, as:
 
 \clearpage
 

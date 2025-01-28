@@ -15,6 +15,8 @@ data_path = Path(".")
 data_files = data_path.glob("data*.h5")
 data_files = natsorted(data_files, key=lambda x: x.name)
 
+n_files = len(data_files)
+
 with h5py.File(data_files[-1], 'r') as data_file:
     rho = np.array(data_file["rho"])
     rho_lava = np.array(data_file["rho_lava"])
@@ -23,23 +25,24 @@ with h5py.File(data_files[-1], 'r') as data_file:
 
 
 NY = u[0,:].shape[0]
-u_analytical = np.zeros(NY)
-u_analytical_2 = np.zeros(NY)
-F = 1e-5
-a = NY/4
-d = NY/2
-nu_lava = 1.0/3.0*(1.0-0.5)
-nu_air = 1.0/3.0*(0.625-0.5)
-print(nu_lava, nu_air)
-y = np.arange(-d + 1/2, d, 1)
+u_analytical = np.zeros(NY, dtype=np.float64)
+y = np.zeros(NY, dtype=np.float64)
+F = 1e-7
+a = 32.0
+L_y = float(NY)/2.0
+
+tau_lava = 1.0
+tau_air = 0.625
+nu_lava = 1.0/3.0*(tau_lava - 0.5)
+nu_air = 1.0/3.0*(tau_air - 0.5)
 
 for j in range(NY):
-    if (j < NY/4) or (j >= NY*3/4):
-        u_analytical[j] = F/(2*nu_lava)*(d**2 - y[j]**2)
+    y_i = float(j) + 0.5 - L_y
+    y[j] = y_i
+    if (np.abs(y_i) > a):
+        u_analytical[j] = F/(2.0*nu_lava)*(L_y**2 - y_i**2)
     else:
-        u_analytical[j] = F/(2*nu_lava)*(d**2 - a**2) + F/(2*nu_air)*(a**2 - y[j]**2)
-    u_analytical_2[j] = F/(2*nu_lava)*(d**2 - y[j]**2)
-        
+        u_analytical[j] = F/(2.0*nu_lava)*(L_y**2 - a**2) + F/(2.0*nu_air)*(a**2 - y_i**2)
 
 fig, ax = plt.subplots(nrows = 1, ncols=2, figsize=(14, 6.0), sharey=True)
 fig.tight_layout()

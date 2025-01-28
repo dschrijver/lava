@@ -32,17 +32,7 @@ void calculate_hydrodynamic_macroscopic_quantities() {
             v_i = 0.0;
 
             for (int p = 0; p < NP; p++) {
-
                 
-
-#ifndef DUALCOMPONENT
-
-                rho_i += f1[INDEX_3D(i,j,p)];
-                u_i += f1[INDEX_3D(i,j,p)]*cx[p];
-                v_i += f1[INDEX_3D(i,j,p)]*cy[p];
-
-#endif
-
 #ifdef DUALCOMPONENT
 
                 rho_i += f1_lava[INDEX_3D(i,j,p)] + f1_air[INDEX_3D(i,j,p)];
@@ -50,6 +40,12 @@ void calculate_hydrodynamic_macroscopic_quantities() {
                 rho_air_i += f1_air[INDEX_3D(i,j,p)];
                 u_i += (f1_lava[INDEX_3D(i,j,p)] + f1_air[INDEX_3D(i,j,p)])*cx[p];
                 v_i += (f1_lava[INDEX_3D(i,j,p)] + f1_air[INDEX_3D(i,j,p)])*cy[p];
+
+#else 
+
+                rho_i += f1[INDEX_3D(i,j,p)];
+                u_i += f1[INDEX_3D(i,j,p)]*cx[p];
+                v_i += f1[INDEX_3D(i,j,p)]*cy[p];
 
 #endif
 
@@ -59,6 +55,13 @@ void calculate_hydrodynamic_macroscopic_quantities() {
 
             u[INDEX_2D(i,j)] = u_i / rho_i;
             v[INDEX_2D(i,j)] = v_i / rho_i;
+
+#ifdef DUALCOMPONENT
+
+            rho_lava[INDEX_2D(i,j)] = rho_lava_i;
+            rho_air[INDEX_2D(i,j)] = rho_air_i;
+
+#endif
 
         }
     }

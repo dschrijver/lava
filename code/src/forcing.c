@@ -13,7 +13,11 @@ void calculate_body_forces() {
 
     double rho_i, rho_lava_i, rho_air_i;
 
-    double Fx_lava_i = 0.0, Fy_lava_i = 0.0, Fx_air_i = 0.0, Fy_air_i = 0.0;
+    double Fx_lava_i, Fy_lava_i, Fx_air_i, Fy_air_i;
+
+    #ifdef TEMPERATURE
+        double F_buoy;
+    #endif
 
 #else
 
@@ -40,10 +44,15 @@ void calculate_body_forces() {
             rho_lava_i = rho_lava[INDEX_2D(i,j)];
             rho_air_i = rho_air[INDEX_2D(i,j)];
 
+            Fx_lava_i = 0.0; 
+            Fy_lava_i = 0.0; 
+            Fx_air_i = 0.0;
+            Fy_air_i = 0.0;
+
             for (int p = 0; p < NP; p++) {
 
-                x_i = i-cx_i[p];
-                y_i = j-cy_i[p];
+                x_i = i+cx_i[p];
+                y_i = j+cy_i[p];
 
     #ifdef XPERIODIC
                 if (x_i < 0) x_i = NX-1;
@@ -86,8 +95,10 @@ void calculate_body_forces() {
 
 
     #ifdef TEMPERATURE
-            Fy_lava_i += rho_lava_i/rho_i*alpha_lava*(T[INDEX_2D(i,j)] - T_0_lava)*g;
-            Fy_air_i += rho_air_i/rho_i*alpha_air*(T[INDEX_2D(i,j)] - T_0_air)*g;
+            F_buoy = (rho_0_lava*alpha_lava*(T[INDEX_2D(i,j)] - T_0_lava) + 
+                      rho_0_air*alpha_air*(T[INDEX_2D(i,j)] - T_0_air))*g;
+            Fy_lava_i += rho_lava_i/rho_i*F_buoy;
+            Fy_air_i += rho_air_i/rho_i*F_buoy;
     #endif
 
     #ifdef PHASECHANGE
@@ -109,7 +120,7 @@ void calculate_body_forces() {
             Fy_i = Fy_body;
 
     #ifdef TEMPERATURE
-            Fy_i += alpha*(T[INDEX_2D(i,j)] - T_0)*g;
+            Fy_i += rho_0*alpha*(T[INDEX_2D(i,j)] - T_0)*g;
     #endif
 
     #ifdef PHASECHANGE

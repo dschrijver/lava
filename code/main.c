@@ -59,10 +59,6 @@ int main(void) {
         calculate_thermal_macroscopic_quantities();
 #endif
 
-#ifdef PHASECHANGE
-        calculate_enthalpy_and_liquid_fraction();
-#endif
-
 #ifdef FLOW
         collide_hydrodynamic_populations();
 #endif
@@ -81,6 +77,10 @@ int main(void) {
 
 #ifdef FLOW
         shift_velocity();
+#endif
+
+#ifdef PHASECHANGE
+        calculate_enthalpy_and_liquid_fraction();
 #endif
 
         if (((t+1) % NLOG) == 0) {
