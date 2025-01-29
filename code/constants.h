@@ -10,21 +10,21 @@
 
 /*───────────────────────────── Time Control ────────────────────────────────*/
 // Number of timesteps.
-#define NTIME       10000000
+#define NTIME       100000
 // Print progress percentage after NLOG timesteps
-#define NLOG        10
+#define NLOG        1
 
 /*───────────────────────────── Domain Size ─────────────────────────────────*/
 // Number of cells in the x-direction.
-#define NX          4
+#define NX          1
 // Number of cells in the y-direction.
-#define NY          512
+#define NY          2000
 
 /*───────────────────────────── Output ──────────────────────────────────────*/
 // Output macroscopic quantities to h5 files.
 #define OUTPUT
 // Store macroscopic quantities in an h5 file after NSTORE timesteps.    
-#define NSTORE      100000
+#define NSTORE      1000
 
 /*───────────────────────────── Animation ───────────────────────────────────*/
 // Animate a macroscopic quantity.
@@ -61,13 +61,13 @@
 /*───────────────────────────── Shan-Chen Method ────────────────────────────*/
 #define DUALCOMPONENT
 #ifdef DUALCOMPONENT
-    static double G = 5.5;
+    static double G = 6.0;
 #endif
 /*───────────────────────────────────────────────────────────────────────────*/
 #endif
 
 /*─────────────────────── Advection-Diffusion Equation ──────────────────────*/
-#undef TEMPERATURE
+#define TEMPERATURE
 #ifdef TEMPERATURE
     // |\bm{g}|
     static double g = 0.009661835748792274;
@@ -89,7 +89,7 @@
 /*───────────────────────────── Between Solvers ─────────────────────────────*/
 #ifdef DUALCOMPONENT
     static double tau_lava = 1.0;
-    static double tau_air = 0.625;
+    static double tau_air = 0.8;
 #elif defined(FLOW)
     static double tau = 1.0;
 #endif
@@ -136,7 +136,7 @@
 // Implement no-slip SOUTH walls using the Halfway Bounce-Back Method.
 #define SOUTH_NOSLIP_HALFWAY_BOUNCEBACK
 #if defined (SOUTH_NOSLIP_HALFWAY_BOUNCEBACK) && defined(TEMPERATURE)
-    static double T_bottom = -1.0;
+    static double T_bottom = 0.0526;
 #endif
 
 // Implement no-slip NORTH walls using the Halfway Bounce-Back Method.
@@ -197,8 +197,8 @@
 #endif
 
 // Initialize the density of air near the channel, and the density of lava in the center.
-#define DENSITY_TWO_COMPONENT_POISEUILLE
-#if defined(DENSITY_TWO_COMPONENT_POISEUILLE) && defined(DUALCOMPONENT)
+#undef DENSITY_TWO_COMPONENT_POISEUILLE
+#if defined(DENSITY_TWO_COMPONENT_POISEUILLE) && defined(DUALCOMPONENT) && !defined(TEMPERATURE)
     static int center_width = 64;
 #endif
 /*───────────────────────────────────────────────────────────────────────────*/
@@ -209,7 +209,7 @@
 /*───────────────────── Velocity Initial Conditions ─────────────────────────*/
 
 // Initialize the velocity as zero.
-#define VELOCITY_ZERO
+#undef VELOCITY_ZERO
 
 // Initialize both velocity components as a sine wave. 
 #undef VELOCITY_SINE
@@ -219,11 +219,6 @@
     static double u_ini_frequency = 1.0;
     static double v_ini_frequency = 1.0;
 #endif
-
-#undef VELOCITY_CHANNEL
-#if defined(VELOCITY_CHANNEL) && defined(PHASECHANGE)
-    static double dp_dx = 1e-5;
-#endif
 /*───────────────────────────────────────────────────────────────────────────*/
 #endif
 
@@ -231,7 +226,7 @@
 /*───────────────────── Temperature Initial Conditions ──────────────────────*/
 
 // Initialize the temperature as a constant value.
-#define TEMPERATURE_CONSTANT_VALUE
+#undef TEMPERATURE_CONSTANT_VALUE
 #ifdef TEMPERATURE_CONSTANT_VALUE
     static double T_ini = 0.0526;
 #endif
@@ -242,14 +237,6 @@
     static double T_ini_bottom = 294.0;
     static double T_ini_top = 293.0;
 #endif
-
-// Initialize the temperature to below the melting temperature near the channel walls, 
-// and above the melting temperature in the middle of the channel.
-#undef TEMPERATURE_CHANNEL
-#if defined(TEMPERATURE_CHANNEL) && defined(PHASECHANGE)
-    static double T_ini_solid = -1.0;
-    static double T_ini_liquid = 0.0526;
-#endif
 /*───────────────────────────────────────────────────────────────────────────*/
 #endif
 
@@ -257,21 +244,38 @@
 /*───────────────────── Liquid Fraction Initial Conditions ───────────────────*/
 
 // Initialize the liquid fraction as a constant value. 
-#define PHI_CONSTANT_VALUE
+#undef PHI_CONSTANT_VALUE
 #ifdef PHI_CONSTANT_VALUE
     static double phi_ini = 1.0;
-#endif
-
-// Initialize the liquid fraction to be 0 near the channel walls,
-// and 1 in the middle of the channel.
-#undef PHI_CHANNEL
-#ifdef PHI_CHANNEL
-    static double channel_width = 100.0;
 #endif
 /*───────────────────────────────────────────────────────────────────────────*/
 #endif
 
+/*───────────────────────── Mixed Initial Conditions ────────────────────────*/
 
+#if defined(FLOW) && !defined(DUALCOMPONENT) && defined(TEMPERATURE) && defined(PHASECHANGE)
+
+#undef CHANNEL
+#ifdef CHANNEL
+    static double center_width = 100.0;
+    static double T_ini_solid = -1.0;
+    static double T_ini_liquid = 0.0526;
+#endif
+
+#endif
+
+#if defined(FLOW) && defined(DUALCOMPONENT) && defined(TEMPERATURE) && defined(PHASECHANGE)
+
+#define DUALCOMPONENT_CHANNEL
+#ifdef DUALCOMPONENT_CHANNEL
+    static double lava_height = 500.0;
+    static double T_ini_lava = 0.0526;
+    static double T_ini_air = -1.0;
+#endif
+
+#endif
+
+/*───────────────────────────────────────────────────────────────────────────*/
 
 
 /*────────────────────────────────────────────────────────────────────────────*/

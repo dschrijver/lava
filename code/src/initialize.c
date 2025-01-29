@@ -8,19 +8,9 @@
 
 void initialize_macroscopic_quantities() {
 
-#ifdef DENSITY_TWO_COMPONENT_POISEUILLE
+#if defined(DENSITY_TWO_COMPONENT_POISEUILLE) || defined(CHANNEL) || defined(DUALCOMPONENT_CHANNEL)
 
     double y;
-
-#endif
-
-#ifdef VELOCITY_CHANNEL
-
-    double y, y_shift;
-
-    double d = channel_width / 2.0;
-    double nu = cs2*(tau - 0.5);
-    double offset = ((double)NY-channel_width) / 2.0;
 
 #endif
 
@@ -70,22 +60,6 @@ void initialize_macroscopic_quantities() {
 
 #endif
 
-#ifdef VELOCITY_CHANNEL
-
-            y = (double)j + 0.5;
-
-            if ((y > offset) && (y < offset + channel_width)) {
-                y_shift = (double)j + 0.5 - d - offset;
-                u[INDEX_2D(i,j)] = dp_dx/(2.0*nu)*(d*d - y_shift*y_shift);
-            } else {
-                u[INDEX_2D(i,j)] = 0.0;
-            }
-            
-            v[INDEX_2D(i,j)] = 0.0;
-
-#endif
-
-
 #ifdef TEMPERATURE_CONSTANT_VALUE
 
             T[INDEX_2D(i,j)] = T_ini;
@@ -98,35 +72,68 @@ void initialize_macroscopic_quantities() {
 
 #endif
 
-#ifdef TEMPERATURE_CHANNEL
-
-            if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
-                ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
-                T[INDEX_2D(i,j)] = T_ini_solid;
-            }
-            else {
-                T[INDEX_2D(i,j)] = T_ini_liquid; 
-            }
-
-#endif
-
 #ifdef PHI_CONSTANT_VALUE
 
             phi[INDEX_2D(i,j)] = phi_ini;
             phi_old[INDEX_2D(i,j)] = phi_ini;
 
 #endif
-    
-#ifdef PHI_CHANNEL
 
-            if (((double)j + 0.5 < 0.5*((double)NY-channel_width)) || 
-                ((double)j + 0.5 > 0.5*((double)NY-channel_width) + channel_width)) {
-                phi[INDEX_2D(i,j)] = 0.0;
-                phi_old[INDEX_2D(i,j)] = 0.0;
-            }
-            else {
+#ifdef CHANNEL
+
+            rho[INDEX_2D(i,j)] = 1.0;
+
+            u[INDEX_2D(i,j)] = 0.0;
+            v[INDEX_2D(i,j)] = 0.0;
+
+            y = -(double)NY / 2.0 + (double)j + 0.5;
+
+            if ((y > -center_width/2.0) && (y < center_width/2.0)) {
+
+                T[INDEX_2D(i,j)] = T_ini_liquid;
                 phi[INDEX_2D(i,j)] = 1.0;
                 phi_old[INDEX_2D(i,j)] = 1.0;
+
+            }
+
+            else {
+
+                T[INDEX_2D(i,j)] = T_ini_solid;
+                phi[INDEX_2D(i,j)] = 0.0;
+                phi_old[INDEX_2D(i,j)] = 0.0;
+
+            }
+
+#endif
+
+#ifdef DUALCOMPONENT_CHANNEL
+
+            rho[INDEX_2D(i,j)] = 1.0;
+
+            u[INDEX_2D(i,j)] = 0.0;
+            v[INDEX_2D(i,j)] = 0.0;
+
+            y = (double)j + 0.5;
+
+            if (y < lava_height) {
+
+                rho_lava[INDEX_2D(i,j)] = 1.0;
+                rho_air[INDEX_2D(i,j)] = 0.0;
+                T[INDEX_2D(i,j)] = T_ini_lava;
+                phi[INDEX_2D(i,j)] = 1.0;
+                phi_old[INDEX_2D(i,j)] = 1.0;
+
+            }
+
+            else {
+
+                rho_lava[INDEX_2D(i,j)] = 0.0;
+                rho_air[INDEX_2D(i,j)] = 1.0;
+                // T[INDEX_2D(i,j)] = (0.0-T_ini_air)/(lava_height-(double)NY)*(y-NY) + T_ini_air;
+                T[INDEX_2D(i,j)] = T_ini_air;
+                phi[INDEX_2D(i,j)] = 0.0;
+                phi_old[INDEX_2D(i,j)] = 0.0;
+
             }
 
 #endif
