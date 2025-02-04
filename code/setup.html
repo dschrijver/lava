@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+        });
+    </script>
+    <script type="text/javascript"
+        src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+	<title>Lava Setup</title>
+    <style>
+        /* html, body {
+            margin: 0px;
+            padding: 0px;   
+        } */
+
+        /* form {
+            width: 60%;
+            margin: auto;
+        } */
+
+        .flow_options, .dualcomponent_options, .temperature_options, .phasechange_options {
+            display: none;
+        }
+
+    </style>
+    <script>
+
+        function init(){
+            document.getElementById("form").onsubmit = check_settings;
+        }
+
+        function check_settings() {
+            settings = document.getElementById("form").getElementsByTagName("input");
+            document.write(settings[0].checked);
+            return false;
+        }
+
+        function toggle_flow(is_checked, options_class) {
+            if (!is_checked && (options_class == "flow_options")) {
+                document.getElementById("DUALCOMPONENT").checked = false;
+                toggle_flow(false, "dualcomponent_options");
+            }
+
+            if (!is_checked && (options_class == "temperature_options")) {
+                document.getElementById("PHASECHANGE").checked = false;
+                toggle_flow(false, "phasechange_options");
+            }
+
+            options = document.getElementsByClassName(options_class);
+            anti_options = document.getElementsByClassName(options_class + "_anti");
+            for (var i = 0; i < options.length; i++) {
+                if (is_checked) {
+                    options[i].style.display = "inline-block";
+                }
+                else {
+                    options[i].style.display = "none";
+                }
+            }
+            for (var i = 0; i < anti_options.length; i++) {
+                if (is_checked) {
+                    anti_options[i].style.display = "none";
+                }
+                else {
+                    anti_options[i].style.display = "inline-block";
+                }
+            }
+        }
+
+        window.onload = init;
+
+    </script>
+</head>
+<body>
+    <form id = "form">
+        <h3>SOLVERS</h3>
+        <span>Flow:</span><input type = "checkbox" name = "FLOW" id = "FLOW" onchange = "toggle_flow(this.checked, 'flow_options')"/>
+        <br>
+        
+        <div class = "flow_options">
+            <span>$F_{x,\text{body}} = $</span><input type = "text" name = "Fx_body"/>
+            <span>$F_{y,\text{body}} = $</span><input type = "text" name = "Fx_body"/>
+            <br>
+            <div class = "dualcomponent_options_anti">
+                <span>$\tau = $</span><input type = "text" name = "tau"/>
+            </div>
+            <div class = "dualcomponent_options">
+                <span>$\tau^{\text{lava}} = $</span><input type = "text" name = "tau_lava"/>
+                <span>$\tau^{\text{air}} = $</span><input type = "text" name = "tau_air"/>
+            </div>
+            <br>
+            <span>Dual-component:</span><input type = "checkbox" name = "DUALCOMPONENT" id = "DUALCOMPONENT" onchange = "toggle_flow(this.checked, 'dualcomponent_options')"/>
+            <br>
+            <div class = "dualcomponent_options">
+                <span>$G_{\text{SC}} = $</span><input type = "text" name = "G_SC"/>
+            </div>
+        </div>
+        <br>
+
+        <span>Temperature:</span><input type = "checkbox" name = "TEMPERATURE" id = "TEMPERATURE" onchange = "toggle_flow(this.checked, 'temperature_options')"/>
+        <br>
+
+        <div class = "temperature_options">
+            <div class = "dualcomponent_options">
+                <span>$\rho_0^{\text{lava}} = $</span><input type = "text" name = "rho_0_lava"/>
+                <span>$\rho_0^{\text{air}} = $</span><input type = "text" name = "rho_0_air"/>
+                <br>
+                <span>$T_0^{\text{lava}} = $</span><input type = "text" name = "T_0_lava"/>
+                <span>$T_0^{\text{air}} = $</span><input type = "text" name = "T_0_air"/>
+                <br>
+                <span>$\alpha^{\text{lava}} = $</span><input type = "text" name = "alpha_lava"/>
+                <span>$\alpha^{\text{air}} = $</span><input type = "text" name = "alpha_air"/>
+                <br>
+            </div>
+            <div class = "flow_options">
+                <span>$g = $</span><input type = "text" name = "Fx_body"/>
+                <div class = "dualcomponent_options_anti">
+                    <span>$\rho_0 = $</span><input type = "text" name = "rho_0"/>
+                    <span>$T_0 = $</span><input type = "text" name = "T_0"/>
+                    <span>$\alpha = $</span><input type = "text" name = "alpha"/>
+                    <br>
+                </div>
+            </div>  
+            <br>
+            <div class = "phasechange_options_anti">
+                <div class = "dualcomponent_options_anti">
+                    <span>$\tau_g = $</span><input type = "text" name = "tau_g"/>
+                </div>
+                <div class = "dualcomponent_options">
+                    <span>$\tau_g^{\text{lava}} = $</span><input type = "text" name = "tau_g_lava"/>
+                    <span>$\tau_g^{\text{air}} = $</span><input type = "text" name = "tau_g_air"/>
+                </div>
+            </div>
+            <div class = "phasechange_options">
+                <div class = "dualcomponent_options_anti">
+                    <span>$\tau_g^{\text{liquid}} = $</span><input type = "text" name = "tau_g_liquid"/>
+                    <span>$\tau_g^{\text{solid}} = $</span><input type = "text" name = "tau_g_solid"/>
+                </div>
+                <div class = "dualcomponent_options">
+                    <span>$\tau_g^{\text{lava, liquid}} = $</span><input type = "text" name = "tau_g_lava_liquid"/>
+                    <span>$\tau_g^{\text{lava, solid}} = $</span><input type = "text" name = "tau_g_lava_solid"/>
+                    <span>$\tau_g^{\text{air}} = $</span><input type = "text" name = "tau_g_air"/>
+                </div>
+            </div>
+            <br>
+            <span>Phase change:</span><input type = "checkbox" name = "PHASECHANGE" id = "PHASECHANGE" onchange = "toggle_flow(this.checked, 'phasechange_options')"/>
+            <br>
+            <div class = "phasechange_options">
+                <span>$c^{\text{liquid}} = $</span><input type = "text" name = "c_liquid"/>
+                <span>$c^{\text{solid}} = $</span><input type = "text" name = "c_solid"/>
+                <br>
+                <span>$L_f = $</span><input type = "text" name = "L_f"/>
+                <span>$T_{\text{melt}} = $</span><input type = "text" name = "T_melt"/>
+                <br>
+            </div>
+        </div>
+        <br>
+
+        <h3>BOUNDARY CONDITIONS</h3>
+        
+        <span>$x$-periodic:</span><input type = "checkbox" name = "XPERIODIC" id = "XPERIODIC" onchange = "toggle_flow(this.checked, 'xperiodic_options')"/>
+        <br>
+
+        <div class = "xperiodic_options_anti">
+            
+            <span>West pressure inlet:</span><input type = "checkbox" name = "WEST_PRESSURE_INLET" id = "WEST_PRESSURE_INLET" onchange = "toggle_flow(this.checked, 'west_pressure_inlet_options')"/>
+            <br>
+            <div class = "west_pressure_inlet_options" style = "display:none">
+                <span>$\rho_{\text{west}} = $</span><input type = "text" name = "rho_west"/>
+            </div>
+            <br>
+
+            <span>East pressure outlet:</span><input type = "checkbox" name = "EAST_PRESSURE_OUTLET" id = "EAST_PRESSURE_OUTLET" onchange = "toggle_flow(this.checked, 'east_pressure_outlet_options')"/>
+            <br>
+            <div class = "east_pressure_outlet_options" style = "display:none">
+                <span>$\rho_{\text{east}} = $</span><input type = "text" name = "rho_east"/>
+            </div>
+            <br>
+        <br>
+        </div>
+        <br>
+
+        <input type = "submit" value = "Submit"/>
+    </form>
+</body>
+</html>

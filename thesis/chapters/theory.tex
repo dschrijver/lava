@@ -545,21 +545,56 @@ We define the following:
     \bm{u}(t+1) = \bm{u}^*(t+1) + \frac{1}{2 \rho(t+1)} \sum_\sigma \bm{F}^\sigma(t+1)
 \end{equation}
 
-Furthermore, the Buoyancy force in a two-component fluid is given by:
+\begin{equation}
+    \bm{F}_{\text{body}}^\sigma = \frac{\rho^\sigma}{\rho}\rho^\sigma_0 \bm{g}
+\end{equation}
+
+Where we choose $\rho_0^\sigma = \rho^\sigma(T_0^\sigma)$, so we approximate that the density is constant for the gravity. 
 
 \begin{equation}
 \begin{split}
-    \bm{F}_{\text{buoy}} &= \left(\rho(T) - \rho_0\right) \bm{g}\\
-    &\approx \Biggl(\sum_\sigma \Bigl( \rho_0^\sigma \bigl( 1 - \alpha^\sigma \left(T - T_0^\sigma\right) \bigr)\Bigr)  - \sum_\sigma \rho_0^\sigma\Biggr) \bm{g}\\
-    &= -\sum_\sigma \rho_0^\sigma \alpha^\sigma \left(T - T_0^\sigma\right)\bm{g}
+    \alpha^\sigma &\equiv -\frac{1}{V^\sigma(T_0^\sigma)} \frac{\partial V^\sigma}{\partial T}\Bigr|_{T_0^\sigma}\\
+    &= -\frac{1}{\rho^\sigma(T_0^\sigma)} \frac{\partial \rho^\sigma}{\partial T}\Bigr|_{T_0^\sigma}\\
 \end{split}
 \end{equation}
 
-With $\rho_0 \equiv \rho(T_0)$. The component forces are computed by multiplying this force with the density fraction. Because only the lava can experience phase change, there will only be a force on the lava component due to penalization:
+\begin{equation}
+    \bm{F}_{\text{buoy}}^\sigma = -\frac{\rho^\sigma}{\rho}\rho^\sigma_0\alpha^\sigma\left(T - T_0^\sigma\right)\bm{g}
+\end{equation}
+
+Because only the lava can experience phase change, there will only be a force on the lava component due to penalization:
 
 \begin{equation}
-    F_{\text{pen}}^{\text{lava}} = -\left(1 - {\left(\phi_l^{\text{lava}}\right)}^2\right) \rho^{\text{lava}}\bm{u}
+    F_{\text{pen}}^{\text{lava}} = -A\left(1 - \phi_l^{\text{lava}}\right) \rho^{\text{lava}}\bm{u}
 \end{equation}
+
+Where $A$ is a tuning parameter, often chosen as 1. 
+
+\begin{equation}
+    \bm{F}_{\text{buoy}}^{\text{lava}} = \phi_l^{\text{lava}}\bm{F}^{\text{lava}}_{\text{buoy}}
+\end{equation}
+\begin{equation}
+    \bm{F}_{\text{body}}^{\text{lava}} = \phi_l^{\text{lava}}\bm{F}^{\text{lava}}_{\text{body}}
+\end{equation}
+\begin{equation}
+    \bm{F}_{\text{SC}}^{\text{lava}} = \phi_l^{\text{lava}} \cdot -G \rho^{\text{lava}}(\bm{x}) \sum_i \left(w_i \rho^{\text{air}}(\bm{x} + \bm{c}_i) \bm{c}_i \right) 
+\end{equation}
+
+So we state that when the lava is liquid, we have the gravity and buoyancy working on the fluid and we have a Shan-Chen force keeping the lava away from the air. When we have solid lava, We only care about making it stationary. We compute the velocity as:
+
+\begin{equation}
+    \bm{u} =  \frac{1}{\rho}\sum_{\sigma} \sum_i f_i^\sigma \bm{c}_i + \frac{1}{2\rho}\left(\bm{F}^{\text{air}} + \bm{F}^{\text{lava}}_{\text{body}} + \bm{F}^{\text{lava}}_{\text{buoy}} + \bm{F}^{\text{lava}}_{\text{SC}} -A\left(1 - \phi_l^{\text{lava}}\right) \rho^{\text{lava}}\bm{u}\right)
+\end{equation}
+
+Solving this gives:
+
+\begin{equation}
+\begin{split}
+    \bm{u} = \frac{\frac{1}{\rho}\sum_{\sigma} \sum_i f_i^\sigma \bm{c}_i + \frac{1}{2\rho}\left(\bm{F}^{\text{air}} + \bm{F}^{\text{lava}}_{\text{body}} + \bm{F}^{\text{lava}}_{\text{buoy}} + \bm{F}^{\text{lava}}_{\text{SC}}\right)}{1 + \frac{A}{2}\frac{\rho^{\text{lava}}}{\rho}\left(1 - \phi_l^{\text{lava}}\right)}
+\end{split}
+\end{equation}
+
+
 
 Furthermore, for the source in the thermal collision step, we multiply it by $\frac{\rho^{\text{lava}}}{\rho}$. We can define a general algorithm with 2 components, where one can change phase, as:
 
@@ -569,14 +604,17 @@ Furthermore, for the source in the thermal collision step, we multiply it by $\f
     \item[(i)] Choose $\rho^{\text{lava}}(t_0)$, $\rho^{\text{air}}(t_0)$, $\bm{u}(t_0)$, $T(t_0)$ and $\phi_l^{\text{lava}}(t_0)$,
     \item[(ii)] $\rho(t_0) = \rho^{\text{lava}}(t_0) + \rho^{\text{air}}(t_0)$,
     \item[(iii)] $\phi_l^{\text{lava}}(t_0-1) = \phi_l^{\text{lava}}(t_0)$,
-    \item[(iv)] Compute $\bm{F}^\sigma_{\text{body}}(t_0)$ using $\rho^\sigma(t_0)$.
-    \item[(v)] Compute $\bm{F}^\sigma_{\text{buoy}}(t_0)$ using $\rho^\sigma(t_0)$ and $T(t_0)$.
-    \item[(vi)] Compute $\bm{F}^\sigma_{\text{SC}}(t_0)$ using $\rho^\sigma(t_0)$.
-    \item[(vii)] $\bm{f}^\sigma(t_0) = \bm{f}^{\text{eq},\sigma}\bigl(\rho^\sigma(t_0), \hat{\bm{u}}(t_0)\bigr)$.
-    \item[(viii)] $\bm{g}(t_0) = \bm{g}^{\text{eq}}\bigl(T(t_0), \hat{\bm{u}}(t_0)\bigr)$
-    \item[(ix)] $t = t_0$.
+    \item[(iv)] Compute $\bm{F}^\sigma_{\text{body}}(t_0)$ using $\rho(t_0)$, $\rho^\sigma(t_0)$ and $\phi_l^{\text{lava}}(t_0)$.
+    \item[(v)] Compute $\bm{F}^\sigma_{\text{buoy}}(t_0)$ using $\rho(t_0)$, $\rho^\sigma(t_0)$, $T(t_0)$ and $\phi_l^{\text{lava}}(t_0)$ .
+    \item[(vi)] Compute $\bm{F}^\sigma_{\text{SC}}(t_0)$ using $\rho^\sigma(t_0)$ and $\phi_l^{\text{lava}}(t_0)$.
+    \item[(vii)] Compute $\bm{F}^\sigma_{\text{pen}}(t_0)$ using $\rho^{\text{lava}}(t_0)$, $\phi_l^{\text{lava}}(t_0)$ and $\bm{u}(t_0)$.
+    \item[(viii)] Compute $\hat{\bm{u}}(t_0)$ using $\rho(t_0)$, $\bm{u}(t_0)$ and $\bm{F}^\sigma(t_0)$.
+    \item[(ix)] $\bm{f}^\sigma(t_0) = \bm{f}^{\text{eq},\sigma}\bigl(\rho^\sigma(t_0), \hat{\bm{u}}(t_0)\bigr)$.
+    \item[(x)] $\bm{g}(t_0) = \bm{g}^{\text{eq}}\bigl(T(t_0), \hat{\bm{u}}(t_0)\bigr)$
+    \item[(xi)] $t = t_0$.
     \item[1.] Finalize when $t = t_{\text{final}}$.
     \item[2.] Compute $\bm{g}^{\text{eq}}(t)$ using $T(t)$ and $\bm{u}(t)$.
+    \item[3.] Compute $S^{\text{thermal}}_{test}$ 
     \item[3.] Collide $\bm{g}^*(t)$ using $\bm{g}(t)$, $\bm{g}^{\text{eq}}(t)$, $\rho(t)$, $\phi_l^{\text{lava}}(t-1)$ and $\phi_l^{\text{lava}}(t)$.
     \item[4.] Stream $\bm{g}(t+1)$ using $\bm{g}^*(t)$ and $\phi_l^{\text{lava}}(t)$.
     \item[5.] Compute $T(t+1)$ using $\bm{g}(t+1)$.
@@ -593,3 +631,103 @@ Furthermore, for the source in the thermal collision step, we multiply it by $\f
     \item[16.] Compute $\phi_l^{\text{lava}}(t+1)$ using $H^{\text{lava}}(t+1)$.
     \item[17.] $t \rightarrow t+1$, return to step 1. 
 \end{itemize}
+
+\clearpage
+
+\begin{equation}
+    \frac{\partial \rho}{\partial t} + \bm{\nabla} \cdot \left(\rho \bm{u}\right) = 0
+\end{equation}
+\begin{equation}
+    \frac{\partial \left(\rho \bm{u}\right)}{\partial t} + \bm{\nabla}\cdot \left(\rho \bm{u}\bm{u}\right) = \bm{\nabla} \cdot \underline{\underline{\tau}} + \bm{f}
+\end{equation}
+\begin{equation}
+    \underline{\underline{\tau}} = -\bigl(p - \zeta \left(\bm{\nabla}\cdot \bm{u}\right)\bigr)\underline{\underline{I}} + \mu\left(\bm{\nabla}\bm{u} + \left(\bm{\nabla}\bm{u}\right)^T - \frac{2}{3}\left(\bm{\nabla}\cdot\bm{u}\right)\underline{\underline{I}}\right)
+\end{equation}
+\begin{equation}
+    \frac{\partial H}{\partial t} + \bm{\nabla} \cdot \left(H \bm{u}\right) = \bm{\nabla}\cdot\left(k \bm{\nabla}T\right)
+\end{equation}
+\begin{equation}
+\begin{split}
+    H =& \rho^{\text{air}} c^{\text{air}} T + \rho^{\text{lava}}\Bigl(\bigl(1 - \phi_l^{\text{lava}}\bigr)c_{\text{solid}}^{\text{lava}}T + \phi_l^{\text{lava}}\bigl(c_{\text{solid}}^{\text{lava}}T_{\text{melt}} + c_{\text{liquid}}^{\text{lava}}\left(T - T_{\text{melt}}\right)\bigr)\Bigr)\\
+    & + \rho^{\text{lava}} \phi_l^{\text{lava}} L_f\\
+    =& \rho c T + \rho^{\text{lava}}\phi_l^{\text{lava}}\left(\Delta c^{\text{lava}} T_m + L_f\right)
+\end{split}
+\end{equation}
+\begin{equation}
+    c^{\text{lava}} \equiv \left(1 - \phi_l^{\text{lava}}\right) c^{\text{lava}}_{\text{solid}} + \phi_l^{\text{lava}}c^{\text{lava}}_{\text{liquid}}
+\end{equation}
+\begin{equation}
+    c \equiv \frac{\rho^{\text{lava}}}{\rho}c^{\text{lava}} + \frac{\rho^{\text{air}}}{\rho}c^{\text{air}}
+\end{equation}
+\begin{equation}
+    \Delta c^{\text{lava}}\equiv c^{\text{lava}}_{\text{solid}} - c^{\text{lava}}_{\text{liquid}}
+\end{equation}
+\begin{equation}
+    \phi_l^{\text{lava}} = 
+    \begin{cases}
+        0, & H < H_s\\
+        \frac{H - H_s}{H_l - H_s}, & H_s \leq H \leq H_L\\
+        1, & H > H_l
+    \end{cases}
+\end{equation}
+\begin{equation}
+\begin{split}
+    H_s &\equiv H(T = T_{\text{melt}}, \phi_l^{\text{lava}} = 0) = \rho^{\text{air}} c^{\text{air}} T_{\text{melt}} + \rho^{\text{lava}} c^{\text{lava}}_{\text{solid}} T_{\text{melt}}\\
+    H_l &\equiv H(T = T_{\text{melt}}, \phi_l^{\text{lava}} = 1) = \rho^{\text{air}} c^{\text{air}} T_{\text{melt}} + \rho^{\text{lava}} c^{\text{lava}}_{\text{solid}} T_{\text{melt}} + \rho^{\text{lava}}L_f
+\end{split}
+\end{equation}
+
+Where $c$ indicates the specific heat capacity under constant pressure, $L_f$ indicates the specific latent heat, $\mu$ is the dynamic viscosity, and the kinematic viscosity is given by $\nu = \mu / \rho$. Lastly, the bulk viscosity is given by $\zeta$. The phase change model assumes that the fraction of lava at a point in space solidifies at $T_{\text{melt}}$, such that the temperature only increases after the liquid fraction is unity. The heat conductivity is given by $k$, and the heat diffusivity $\kappa$ is related to the conductivity as $\kappa = k / \left(\rho c\right)$.
+
+\begin{equation}
+    \frac{\partial H}{\partial t} = \frac{\partial\left(\rho c T\right)}{\partial t} + \left(\Delta c^{\text{lava}} T_m + L_f\right) \frac{\partial \left(\rho^{\text{lava}}\phi_l^{\text{lava}}\right)}{\partial t}
+\end{equation}
+\begin{equation}
+    \bm{\nabla} \cdot \left(H \bm{u}\right) = \bm{\nabla}\cdot\left(\rho c T \bm{u}\right) + \left(\Delta c^{\text{lava}} T_m + L_f\right) \bm{\nabla}\cdot\left(\rho^{\text{lava}}\phi_l^{\text{lava}} \bm{u}\right)
+\end{equation}
+\begin{equation}
+    \frac{\partial\left(\rho c T\right)}{\partial t} = \rho c \frac{\partial T}{\partial t} + T \frac{\partial\left(\rho c\right)}{\partial t}
+\end{equation}
+\begin{equation}
+    \bm{\nabla}\cdot\left(\rho c T \bm{u}\right) = \rho c \bm{\nabla}\cdot\left(T \bm{u}\right) + T \bm{u}\cdot\bm{\nabla}\left(\rho c\right)
+\end{equation}
+\begin{equation}
+    \frac{1}{\rho c}\bm{\nabla}\cdot\left(k \bm{\nabla}T\right) = \bm{\nabla}\cdot\left(\kappa \bm{\nabla}T\right) - k \left(\bm{\nabla}T\right) \cdot\bm{\nabla}\left(\frac{1}{\rho c}\right)
+\end{equation}
+\begin{equation}
+    \bm{\nabla}\cdot\left(\rho^{\text{lava}}\phi_l^{\text{lava}} \bm{u}\right) = \frac{\rho^{\text{lava}}\phi_l^{\text{lava}}}{\rho}\left(\bm{u}\cdot \bm{\nabla}\rho - \frac{\partial \rho}{\partial t}\right) + \bm{u}\cdot\bm{\nabla}\left(\rho^{\text{lava}}\phi_l^{\text{lava}}\right)
+\end{equation}
+
+\clearpage
+
+Final heat equation:
+
+\begin{equation}
+\begin{split}
+    \frac{\partial T}{\partial t} + \bm{\nabla}\cdot\left(T \bm{u}\right) =& \bm{\nabla}\cdot\left(\kappa \bm{\nabla}T\right)- \rho c \kappa \left(\bm{\nabla}T\right) \cdot\bm{\nabla}\left(\frac{1}{\rho c}\right)\\
+    & - \frac{T}{\rho c} \bm{u}\cdot\bm{\nabla}\left(\rho c\right) - \frac{T}{\rho c} \frac{\partial\left(\rho c\right)}{\partial t}\\
+    & - \frac{1}{\rho c}\left(\Delta c^{\text{lava}} T_m + L_f\right) \left(\frac{\partial \left(\rho^{\text{lava}}\phi_l^{\text{lava}}\right)}{\partial t} + \frac{\rho^{\text{lava}}\phi_l^{\text{lava}}}{\rho}\left(\bm{u}\cdot \bm{\nabla}\rho - \frac{\partial \rho}{\partial t}\right)\right)
+\end{split}
+\end{equation}
+
+Convert all sources on the right hand side to Lattice Boltzmann sources:
+\begin{equation}
+    \kappa = \frac{k}{\rho c} = c_s^2 \left(\tau - \frac{1}{2}\right) 
+\end{equation}
+\begin{equation}
+\begin{split}
+    -\rho c \kappa \left(\bm{\nabla}T\right)\cdot\bm{\nabla}\left(\frac{1}{\rho c}\right) \approx \frac{\rho c}{c_s^2} \left(1 - \frac{1}{2 \tau}\right)\sum_m \sum_n \bm{c}_m\cdot \bm{c}_n&\Bigl(g_m\left(\bm{x}, t\right) - g_m^{\text{eq}}\left(\bm{x}, t\right)\Bigr)\cdot\\
+    &\Bigl(w_n \frac{1}{\rho\left(\bm{x} + \bm{c}_n, t\right) c\left(\bm{x} + \bm{c}_n, t\right)}\Bigr)
+\end{split}
+\end{equation}
+\begin{equation}
+    - \frac{T}{\rho c} \bm{u}\cdot\bm{\nabla}\left(\rho c\right) \approx - \frac{1}{c_s^2}\frac{T}{\rho c} \sum_j \bm{u}\cdot \bm{c}_j\Bigl( w_j \rho\left(\bm{x} + \bm{c}_j, t\right) c\left(\bm{x} + \bm{c}_j, t\right)\Bigr) 
+\end{equation}
+\begin{equation}
+    - \frac{\partial \left(\rho^{\text{lava}}\phi_l^{\text{lava}}\right)}{\partial t} \approx - \frac{1}{\rho c}\left(\Delta c^{\text{lava}} T_m + L_f\right)\Bigl(\rho^{\text{lava}}(t)\phi_l^{\text{lava}}(t) - \rho^{\text{lava}}(t-1)\phi_l^{\text{lava}}(t-1)\Bigr)
+\end{equation}
+\begin{equation}
+    \bm{u}\cdot \bm{\nabla}\rho - \frac{\partial \rho}{\partial t} \approx \bm{u} \cdot \frac{1}{c_s^2}\sum_j w_j \rho(\bm{x} + \bm{c}_j, t)\bm{c}_j - \Bigl(\rho(t) - \rho(t-1)\Bigr)
+\end{equation}
+
+In the Lattice Boltzmann scheme, all these sources will be multiplied by $w_i$.
